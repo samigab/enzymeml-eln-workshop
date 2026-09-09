@@ -1,0 +1,51 @@
+[project]
+name = "eln-converter"
+version = "0.3.0"
+description = "Export FAIRFluids and EnzymeML v2 as ELN RO-Crates (.eln) — and read them back"
+readme = "README.md"
+# The core would run on 3.9 (rocrate's own floor), but pyenzyme and current
+# matplotlib both require 3.11, and notebook 0 needs pyenzyme. Declaring 3.11
+# here makes uv say so before installing, and fetch a matching interpreter
+# itself, instead of producing an environment where notebook 0 fails on import.
+requires-python = ">=3.11"
+# ro-crate-py is the reference implementation of the RO-Crate model. We build
+# the graph with it rather than assembling it by hand: the library enforces
+# flattened JSON-LD, and in doing so rejected two nodes of ours that eLabFTW
+# had been quietly skipping. The price is paid deliberately — since 0.3.0 the
+# core needs an install and no longer runs on a bare Python.
+dependencies = ["rocrate>=0.15"]
+
+[project.optional-dependencies]
+# Plots are a garnish: without matplotlib, plot.png is silently omitted.
+plots = ["matplotlib>=3.7"]
+
+[dependency-groups]
+# uv installs `dev` by default, so for the workshop this is enough:
+#   uv run marimo edit notebooks/00_build_document.py
+dev = [
+    "marimo>=0.11",
+    "matplotlib>=3.7",
+    # the official EnzymeML v2 data model; notebook 0 builds the document with
+    # it instead of assembling a dict by hand
+    "pyenzyme>=2.2",
+]
+# Test tooling, not runtime: the same libraries the ELN Consortium's CI uses to
+# sign off on an .eln file. They check our export against foreign code rather
+# than against our own assumptions.
+checks = [
+    "jsonschema>=4",
+    "roc-validator",
+]
+# Only for the retrieval notebooks: eLabFTW's own generated API client.
+# Deliberately not in the core — exporting an .eln never touches a network, and
+# nobody who only exports should have to install an HTTP client.
+api = [
+    "elabapi-python>=5.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["eln"]

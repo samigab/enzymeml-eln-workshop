@@ -1,0 +1,1238 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Roots -->
+    <xs:element name="FAIRFluidsDocument" type="FAIRFluidsDocumentType"/>
+    <xs:element name="Version" type="VersionType"/>
+    <xs:element name="Citation" type="CitationType"/>
+    <xs:element name="Author" type="AuthorType"/>
+    <xs:element name="Compound" type="CompoundType"/>
+    <xs:element name="Fluid" type="FluidType"/>
+    <xs:element name="Property" type="PropertyType"/>
+    <xs:element name="Parameter" type="ParameterType"/>
+    <xs:element name="Measurement" type="MeasurementType"/>
+    <xs:element name="Sample" type="SampleType"/>
+    <xs:element name="Preparation" type="PreparationType"/>
+    <xs:element name="PropertyValue" type="PropertyValueType"/>
+    <xs:element name="ParameterValue" type="ParameterValueType"/>
+    <xs:element name="FittedModel" type="FittedModelType"/>
+    <xs:element name="FittedParameter" type="FittedParameterType"/>
+    <xs:element name="UnitDefinition" type="UnitDefinitionType"/>
+    <xs:element name="BaseUnit" type="BaseUnitType"/>
+    <xs:element name="Storage" type="StorageType"/>
+    <xs:element name="StorageConditions" type="StorageConditionsType"/>
+    <xs:element name="Vessel" type="VesselType"/>
+    <xs:element name="Vendor_Chemical" type="Vendor_ChemicalType"/>
+
+    <!-- FAIRFluidsDocument Definition -->
+    <xs:complexType name="FAIRFluidsDocumentType">
+        <xs:sequence>
+            <xs:element name="version" type="VersionType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Version of the FAIRFluidsDocument
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="citation" type="CitationType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Add information about the datareport
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="compound">
+                <xs:annotation>
+                    <xs:documentation>
+                        What Compounds are in the fluid
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Compound" type="CompoundType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="fluid">
+                <xs:annotation>
+                    <xs:documentation>
+                        Specifcations of the Fluid. There can be multible Fluids in one
+                        document
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Fluid" type="FluidType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Version Definition -->
+    <xs:complexType name="VersionType">
+        <xs:sequence>
+            <xs:element name="versionMajor" type="xs:integer">
+                <xs:annotation>
+                    <xs:documentation>
+                        Add the major version number to your datareport
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="versionMinor" type="xs:integer">
+                <xs:annotation>
+                    <xs:documentation>
+                        Add the minor version number to your datareport
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Citation Definition -->
+    <xs:complexType name="CitationType">
+        <xs:sequence>
+            <xs:element name="litType" type="LitTypeType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Specifies the type of literature or source document. Accepted values
+                        include: book, journal, report, patent,
+                        thesis, conference proceedings, archived
+                        document, personal correspondence, published
+                        translation, or unspecified.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="author">
+                <xs:annotation>
+                    <xs:documentation>
+                        A list of authors who contributed to the publication. Each entry
+                        should include structured information such as
+                        full name and optionally additional metadata
+                        like affiliation or identifier.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Author" type="AuthorType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="doi" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Digital Object Identifier (DOI) for the publication. A unique
+                        alphanumeric string used to identify and
+                        provide a permanent link to the document
+                        online.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="page" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The page range in which the publication appears, typically formatted
+                        as a string (e.g., '123–135').
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="pub_name" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the publication source, such as the journal title, book
+                        title, or conference name.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="title" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The title of the cited work or publication.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="lit_volume_num" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The volume number of the source publication, if applicable (e.g.,
+                        journal volume).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="url_citation" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        A direct URL link to the publication or citation landing page.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="publication_year" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The year in which the publication was officially released or
+                        published.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Author Definition -->
+    <xs:complexType name="AuthorType">
+        <xs:sequence>
+            <xs:element name="given_name" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The given name (first name or personal name) of the author or
+                        contributor.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="family_name" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The family name (surname or last name) of the author or contributor.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="email" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The email address of the author, if available. Used for contact or
+                        identification purposes.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="orcid" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The ORCID iD of the author, a unique, persistent identifier used to
+                        distinguish researchers (e.g., '0000-0002-
+                        1825-0097').
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="affiliation" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the institution or organization the author is affiliated
+                        with at the time of publication.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Compound Definition -->
+    <xs:complexType name="CompoundType">
+        <xs:sequence>
+            <xs:element name="compoundID" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        A unique identifier assigned to the compound within the scope of this
+                        specific data report or dataset. Used for
+                        internal tracking.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="pubChemID" type="xs:integer">
+                <xs:annotation>
+                    <xs:documentation>
+                        The PubChem Compound Identifier (CID), a unique numeric ID assigned by
+                        the PubChem database to this compound.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="commonName" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The common or generic name of the compound, such as 'Water' for H₂O.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="SELFIE" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The SELFIES (Self-referencing Embedded Strings) representation of
+                        the compound’s molecular structure. A robust,
+                        machine-readable encoding for molecules.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="name_IUPAC" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The full IUPAC (International Union of Pure and Applied Chemistry)
+                        name of the compound, representing its
+                        standardized chemical nomenclature.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="standard_InChI" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The Standard International Chemical Identifier (InChI) string that
+                        uniquely represents the compound’s molecular
+                        structure.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="standard_InChI_key" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The hashed version of the InChI string, known as the InChIKey. It is a
+                        fixed-length, easier-to-search identifier for
+                        databases and indexing.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="molar_weigth" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        The Molar weight in g/mol
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="smiles_code" type="xs:string"/>
+            <xs:element name="sigma_profile" type="xs:integer">
+                <xs:annotation>
+                    <xs:documentation>
+                        The sigma profil
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Fluid Definition -->
+    <xs:complexType name="FluidType">
+        <xs:sequence>
+            <xs:element name="fluidID" type="xs:string"  maxOccurs="unbounded"/>
+            <xs:element name="compounds" type="xs:string"  maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        A list of unique identifiers referencing the compounds present in the
+                        fluid system. Multiple identifiers indicate
+                        a mixture; single entries indicate a pure
+                        substance.v
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="property">
+                <xs:annotation>
+                    <xs:documentation>
+                        A list of physical or thermodynamic properties that were measured
+                        or calculated for the fluid. Each property
+                        is associated with a method identifier
+                        (propertyID) that defines both the property
+                        type (e.g., viscosity, thermal conductivity)
+                        and the experimental or computational method
+                        used.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Property" type="PropertyType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="parameter">
+                <xs:annotation>
+                    <xs:documentation>
+                        A list of experimental parameters. Parameters may vary across
+                        data points (e.g., temperature, pressure,
+                        composition) or serve as constraints that
+                        remain fixed across the dataset (e.g.,
+                        constant pressure or fixed mole ratio).
+                        These define the input conditions under which
+                        properties are observed or measured.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Parameter" type="ParameterType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="sample" type="SampleType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Sample
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="fitted_model">
+                <xs:annotation>
+                    <xs:documentation>
+                        Models fitted to subsets of this fluid's measurements (e.g. Arrhenius/
+                        VFT regression or Bayesian posteriors). Each
+                        entry stores the derived parameters together
+                        with their uncertainties expressed according
+                        to the GUM (Guide to the Expression of
+                        Uncertainty in Measurement).
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="FittedModel" type="FittedModelType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Property Definition -->
+    <xs:complexType name="PropertyType">
+        <xs:sequence>
+            <xs:element name="propertyID" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        A unique identifier for the specific property being reported (e.g.,
+                        viscosity, density, heat capacity).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="properties" type="PropertiesType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Indicates the broader category or group to which the property
+                        belongs (e.g., thermodynamic, transport,
+                        phase behavior). Used to organize related
+                        properties.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="unit" type="UnitDefinitionType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Parameter Definition -->
+    <xs:complexType name="ParameterType">
+        <xs:sequence>
+            <xs:element name="parameterID" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        A unique identifier for this parameter within the dataset. Used for
+                        referencing in conjunction with numerical
+                        values.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="parameters" type="ParametersType">
+                <xs:annotation>
+                    <xs:documentation>
+                        The type or name of the parameter being varied, such as temperature,
+                        pressure, or mole fraction. Indicates what was
+                        controlled or changed during the experiment.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="unit" type="UnitDefinitionType"/>
+            <xs:element name="associated_compounds" type="xs:string"  maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        Identifies the specific compound (by its index or ID) to which this
+                        parameter applies. Useful in multicomponent
+                        systems where a parameter (e.g., mole
+                        fraction) pertains to a specific compound.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Measurement Definition -->
+    <xs:complexType name="MeasurementType">
+        <xs:sequence>
+            <xs:element name="measurement_id" type="xs:string"/>
+            <xs:element name="source_doi" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The Digital Object Identifier (DOI) of the source publication
+                        or dataset from which the fluid data was
+                        obtained.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="propertyValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        An array of numerical values corresponding to the measured or
+                        calculated properties (e.g., density,
+                        viscosity). Each entry should include the
+                        value, units, and possibly uncertainty or
+                        error margins.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="PropertyValue" type="PropertyValueType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="parameterValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        An array of numerical values corresponding to the parameters that were
+                        varied or held constant during the experiment
+                        (e.g., temperature, pressure). Each entry
+                        should specify the value, units, and related
+                        parameter identifier.3
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="ParameterValue" type="ParameterValueType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="method" type="MethodType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Describes how the property value was obtained. Accepted values
+                        may include: , , , , or . This field helps
+                        distinguish between experimental and non-
+                        experimental data sources.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="method_description" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        A free-text description providing additional detail about the
+                        method used to generate the data (e.g.,
+                        specific experimental setup, calculation
+                        model, simulation type, or literature source
+                        details).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Sample Definition -->
+    <xs:complexType name="SampleType">
+        <xs:sequence>
+            <xs:element name="sample_id" type="xs:string"/>
+            <xs:element name="associated_compounds" type="xs:string"  maxOccurs="unbounded"/>
+            <xs:element name="measurement">
+                <xs:annotation>
+                    <xs:documentation>
+                        A collection of measured or calculated numerical data points
+                        associated with the specified properties and
+                        experimental parameters.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Measurement" type="MeasurementType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="storage" type="StorageType"/>
+            <xs:element name="preparation" type="PreparationType"/>
+            <xs:element name="vendor_chemical" type="Vendor_ChemicalType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Preparation Definition -->
+    <xs:complexType name="PreparationType">
+        <xs:sequence>
+            <xs:element name="prepMethod" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The description on how it was prepared
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- PropertyValue Definition -->
+    <xs:complexType name="PropertyValueType">
+        <xs:sequence>
+            <xs:element name="properties" type="PropertiesType"/>
+            <xs:element name="propertyID" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Identifier referencing the property to which this value corresponds.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="propValue" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        The actual measured or calculated numerical value of the property.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="uncertainty" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        The estimated uncertainty or error margin associated with the property
+                        value, typically representing standard
+                        deviation or confidence interval.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ParameterValue Definition -->
+    <xs:complexType name="ParameterValueType">
+        <xs:sequence>
+            <xs:element name="parameters" type="ParametersType">
+                <xs:annotation>
+                    <xs:documentation>
+                        The type or name of the parameter being varied, such as temperature,
+                        pressure, or mole fraction. Indicates what was
+                        controlled or changed during the experiment.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="parameterID" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Identifier referencing the specific parameter this value corresponds
+                        to.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="paramValue" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        The actual measured or set numerical value of the parameter.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="uncertainty" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        The estimated uncertainty or error margin associated with the
+                        parameter value.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- FittedModel Definition -->
+    <xs:complexType name="FittedModelType">
+        <xs:sequence>
+            <xs:element name="modelID" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        A unique identifier for this fitted model within the dataset.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="model_name" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Short machine-readable name of the model, e.g. 'arrhenius',
+                        'extended_arrhenius' or 'vft'.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="model_equation" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Human-readable form of the fitted equation, e.g. 'ln(eta) = ln(As) +
+                        Ea / (R * T)'. Documents what the parameters
+                        mean.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="method" type="FitMethodType">
+                <xs:annotation>
+                    <xs:documentation>
+                        How the parameters were obtained (e.g. ordinary least squares
+                        regression or Bayesian Markov chain Monte
+                        Carlo).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="method_description" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Free-text provenance about the fit, such as software name and version,
+                        prior distributions, sampler settings,
+                        weighting, or any non-default options.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="fitted_property" type="PropertiesType">
+                <xs:annotation>
+                    <xs:documentation>
+                        The physical property that the model describes (e.g. viscosity),
+                        linking the fit to the standardized property
+                        vocabulary.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="parameter">
+                <xs:annotation>
+                    <xs:documentation>
+                        The derived parameters of the model, each with its value, unit and
+                        GUM-style uncertainty.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="FittedParameter" type="FittedParameterType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="covariance" type="xs:float"  maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        Optional parameter covariance matrix. Row and column order follow
+                        the order of the parameter list. Required to
+                        correctly propagate correlated parameters into
+                        predicted quantities.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="r_squared" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        Optional coefficient of determination of the fit, as a quick goodness-
+                        of-fit indicator.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="n_points" type="xs:integer">
+                <xs:annotation>
+                    <xs:documentation>
+                        Optional number of measurement points used in the fit.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="temperature_lower" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        Optional lower bound of the temperature range over which the fit is
+                        valid, in Kelvin.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="temperature_upper" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        Optional upper bound of the temperature range over which the fit is
+                        valid, in Kelvin.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="applied_parameters">
+                <xs:annotation>
+                    <xs:documentation>
+                        Optional fixed conditions this fit applies to, such as the mole
+                        fractions of the composition. Pins the fit to
+                        a specific subset of the fluid's data.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="ParameterValue" type="ParameterValueType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="source_measurement_ids" type="xs:string"  maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        Optional list of measurement identifiers that were used in the fit,
+                        for provenance and traceability.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- FittedParameter Definition -->
+    <xs:complexType name="FittedParameterType">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Name of the parameter, e.g. 'Ea', 'lnAs', 'B' or 'T0'.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="value" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        Best estimate of the parameter. For regression this is the fitted
+                        coefficient; for Bayesian inference it is the
+                        posterior mean or median.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="unit" type="UnitDefinitionType">
+                <xs:annotation>
+                    <xs:documentation>
+                        The unit of the parameter value.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="standard_uncertainty" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        The standard uncertainty u(x) of the parameter, i.e. the estimated
+                        standard deviation. For regression this is the
+                        standard error; for Bayesian inference it is
+                        the posterior standard deviation.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="uncertainty_evaluation" type="UncertaintyEvaluationType">
+                <xs:annotation>
+                    <xs:documentation>
+                        How the standard uncertainty was evaluated, named explicitly so that
+                        no specialized background is required to
+                        interpret it.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="coverage_factor" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        The factor k by which the standard uncertainty is multiplied to obtain
+                        the expanded uncertainty (e.g. k = 2).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="expanded_uncertainty" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        The expanded uncertainty U = k * u, defining a symmetric coverage
+                        interval value +/- U.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="coverage_probability" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        The probability that the coverage interval contains the value, e.g.
+                        0.95.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="degrees_of_freedom" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        Effective number of degrees of freedom behind the uncertainty (e.g.
+                        number of points minus number of fitted
+                        parameters), needed to interpret the coverage
+                        factor for small samples.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="distribution" type="DistributionTypeType">
+                <xs:annotation>
+                    <xs:documentation>
+                        The distribution assumed or sampled for the parameter, which gives
+                        meaning to the coverage interval.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="interval_low" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        Lower bound of the coverage interval (confidence interval for
+                        regression, credible interval for Bayesian
+                        inference).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="interval_high" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        Upper bound of the coverage interval.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="properties" type="PropertiesType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Optional link to a standardized quantity when the parameter
+                        corresponds to one (e.g. activationEnergy),
+                        so that derived quantities remain discoverable
+                        through the property vocabulary.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- UnitDefinition Definition -->
+    <xs:complexType name="UnitDefinitionType">
+        <xs:sequence>
+            <xs:element name="unitID" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Unique identifier for the unit definition, used for referencing in
+                        data fields.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="name" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Human-readable name of the unit (e.g., 'kilogram per cubic meter').
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="base_units">
+                <xs:annotation>
+                    <xs:documentation>
+                        A list of base unit components that, together with exponents, scale,
+                        and multipliers, define the full derived unit.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="BaseUnit" type="BaseUnitType" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- BaseUnit Definition -->
+    <xs:complexType name="BaseUnitType">
+        <xs:sequence>
+            <xs:element name="kind" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The physical quantity represented by the unit (e.g., mass, length,
+                        time, temperature).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="exponent" type="xs:integer">
+                <xs:annotation>
+                    <xs:documentation>
+                        Exponent applied to the base unit (e.g., m² has exponent 2 for
+                        'length').
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="multiplier" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        Numerical multiplier applied to the base unit (e.g., 1000 for gram
+                        when converting to kilogram).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="scale" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        Power-of-ten scale factor applied to the unit (e.g., 3 for kilo, -6
+                        for micro). Applied as 10^scale.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Storage Definition -->
+    <xs:complexType name="StorageType">
+        <xs:sequence>
+            <xs:element name="storage_type" type="StorageTypeType">
+                <xs:annotation>
+                    <xs:documentation>
+                        One of: Fresh, Fridge, Open, Closed
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="storage_conditions" type="StorageConditionsType">
+                <xs:annotation>
+                    <xs:documentation>
+                        What storage conditions have been used for the sample
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="vessel" type="VesselType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Type of vessel used for storage
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="time_prepared" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Date, of Sample preparation
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="time_used" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Time when the sample has been used
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- StorageConditions Definition -->
+    <xs:complexType name="StorageConditionsType">
+        <xs:sequence>
+            <xs:element name="Temperature" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        Temperature under which the sample is stored
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Pressure" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        Pressure under which the sample is stored
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="gassed" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>
+                        Wether the sample was degassed
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="inert" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>
+                        x
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="light" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>
+                        Wether the sample was under light
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Vessel Definition -->
+    <xs:complexType name="VesselType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Unique identifier of the vessel.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="name" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Name of the used vessel.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="volume" type="xs:float">
+                <xs:annotation>
+                    <xs:documentation>
+                        Volumetric value of the vessel.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="unit" type="UnitDefinitionType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Unit
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="constant" type="xs:boolean" default="true">
+                <xs:annotation>
+                    <xs:documentation>
+                        Whether the volume of the vessel is constant or not. Default is True.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Vendor_Chemical Definition -->
+    <xs:complexType name="Vendor_ChemicalType">
+        <xs:sequence>
+            <xs:element name="assciciated_compound" type="xs:string"/>
+            <xs:element name="CAS" type="xs:string"/>
+            <xs:element name="purity" type="xs:string"/>
+            <xs:element name="Vendor" type="xs:string"/>
+            <xs:element name="LOT" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Enum LitType Definition -->
+    <xs:simpleType name="LitTypeType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="archivedDocument"/>
+            <xs:enumeration value="book"/>
+            <xs:enumeration value="conferenceProceedings"/>
+            <xs:enumeration value="journal"/>
+            <xs:enumeration value="patent"/>
+            <xs:enumeration value="personalCorrespondence"/>
+            <xs:enumeration value="publishedTranslation"/>
+            <xs:enumeration value="report"/>
+            <xs:enumeration value="thesis"/>
+            <xs:enumeration value="unspecified"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <!-- Enum Method Definition -->
+    <xs:simpleType name="MethodType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="calculated"/>
+            <xs:enumeration value="literature"/>
+            <xs:enumeration value="measured"/>
+            <xs:enumeration value="simulated"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <!-- Enum Properties Definition -->
+    <xs:simpleType name="PropertiesType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="activationEnergy"/>
+            <xs:enumeration value="activity"/>
+            <xs:enumeration value="activityCoefficient"/>
+            <xs:enumeration value="boilingPoint"/>
+            <xs:enumeration value="compressibility"/>
+            <xs:enumeration value="criticalDensity"/>
+            <xs:enumeration value="criticalPointPressure"/>
+            <xs:enumeration value="criticalPointTemperature"/>
+            <xs:enumeration value="criticalPressure"/>
+            <xs:enumeration value="criticalTemperature"/>
+            <xs:enumeration value="criticalVolume"/>
+            <xs:enumeration value="density"/>
+            <xs:enumeration value="diffusionCoefficient"/>
+            <xs:enumeration value="electricalConductivity"/>
+            <xs:enumeration value="excessMolarEnthalpy"/>
+            <xs:enumeration value="excessMolarEntropy"/>
+            <xs:enumeration value="excessMolarGibbsFreeEnergy"/>
+            <xs:enumeration value="excessMolarVolume"/>
+            <xs:enumeration value="fugacityCoefficient"/>
+            <xs:enumeration value="gibbsFreeEnergy"/>
+            <xs:enumeration value="helmholtzFreeEnergy"/>
+            <xs:enumeration value="henrysLawConstant"/>
+            <xs:enumeration value="ionicStrength"/>
+            <xs:enumeration value="isobaricExpansionCoefficient"/>
+            <xs:enumeration value="isothermalCompressibility"/>
+            <xs:enumeration value="kinematicViscosity"/>
+            <xs:enumeration value="meltingPoint"/>
+            <xs:enumeration value="molarEnthalpy"/>
+            <xs:enumeration value="molarEntropy"/>
+            <xs:enumeration value="molarHeatCapacity"/>
+            <xs:enumeration value="molarVolume"/>
+            <xs:enumeration value="osmoticCoefficient"/>
+            <xs:enumeration value="pH"/>
+            <xs:enumeration value="polarity"/>
+            <xs:enumeration value="refractiveIndex"/>
+            <xs:enumeration value="solubility"/>
+            <xs:enumeration value="specificHeatCapacity"/>
+            <xs:enumeration value="specificVolume"/>
+            <xs:enumeration value="speedOfSound"/>
+            <xs:enumeration value="surfaceTension"/>
+            <xs:enumeration value="thermalConductivity"/>
+            <xs:enumeration value="triplePointPressure"/>
+            <xs:enumeration value="triplePointTemperature"/>
+            <xs:enumeration value="vaporPressure"/>
+            <xs:enumeration value="viscosity"/>
+            <xs:enumeration value="waterActivity"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <!-- Enum Parameters Definition -->
+    <xs:simpleType name="ParametersType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Activity coefficient"/>
+            <xs:enumeration value="Amount concentration (molarity)"/>
+            <xs:enumeration value="Amount density"/>
+            <xs:enumeration value="Amount"/>
+            <xs:enumeration value="Amount ratio of solute to solvent"/>
+            <xs:enumeration value="Final mass fraction of solute"/>
+            <xs:enumeration value="Final molality of solute"/>
+            <xs:enumeration value="Final mole fraction of solute"/>
+            <xs:enumeration value="Frequency"/>
+            <xs:enumeration value="Initial mass fraction of solute"/>
+            <xs:enumeration value="Initial molality of solute"/>
+            <xs:enumeration value="Initial mole fraction of solute"/>
+            <xs:enumeration value="Lower pressure"/>
+            <xs:enumeration value="Lower temperature"/>
+            <xs:enumeration value="Mass"/>
+            <xs:enumeration value="Mass density"/>
+            <xs:enumeration value="Mass fraction"/>
+            <xs:enumeration value="Mass ratio of solute to solvent"/>
+            <xs:enumeration value="Molality"/>
+            <xs:enumeration value="Molar entropy"/>
+            <xs:enumeration value="Molar volume"/>
+            <xs:enumeration value="Mole fraction"/>
+            <xs:enumeration value="Partial pressure"/>
+            <xs:enumeration value="Pressure"/>
+            <xs:enumeration value="Ratio of amount of solute to mass of solution"/>
+            <xs:enumeration value="Ratio of mass of solute to volume of solution"/>
+            <xs:enumeration value="Relative activity"/>
+            <xs:enumeration value="Solvent: Amount concentration (molarity)"/>
+            <xs:enumeration value="Solvent: Amount ratio of component to other component of binary solvent"/>
+            <xs:enumeration value="Solvent: Mass fraction"/>
+            <xs:enumeration value="Solvent: Mass ratio of component to other component of binary solvent"/>
+            <xs:enumeration value="Solvent: Molality"/>
+            <xs:enumeration value="Solvent: Mole fraction"/>
+            <xs:enumeration value="Solvent: Ratio of amount of component to mass of solvent"/>
+            <xs:enumeration value="Solvent: Ratio of component mass to volume of solvent"/>
+            <xs:enumeration value="Solvent: Volume fraction"/>
+            <xs:enumeration value="Solvent: Volume ratio of component to other component of binary solvent"/>
+            <xs:enumeration value="Specific volume"/>
+            <xs:enumeration value="Temperature"/>
+            <xs:enumeration value="Time"/>
+            <xs:enumeration value="Upper pressure"/>
+            <xs:enumeration value="Upper temperature"/>
+            <xs:enumeration value="Volume fraction"/>
+            <xs:enumeration value="Volume ratio of solute to solvent"/>
+            <xs:enumeration value="Wavelength"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <!-- Enum StorageType Definition -->
+    <xs:simpleType name="StorageTypeType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Closed"/>
+            <xs:enumeration value="Dessicator"/>
+            <xs:enumeration value="Fresh"/>
+            <xs:enumeration value="Fridge"/>
+            <xs:enumeration value="Open"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <!-- Enum FitMethod Definition -->
+    <xs:simpleType name="FitMethodType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="bayesianMCMC"/>
+            <xs:enumeration value="literature"/>
+            <xs:enumeration value="regressionNLS"/>
+            <xs:enumeration value="regressionOLS"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <!-- Enum UncertaintyEvaluation Definition -->
+    <xs:simpleType name="UncertaintyEvaluationType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="combined"/>
+            <xs:enumeration value="nonStatistical"/>
+            <xs:enumeration value="posterior"/>
+            <xs:enumeration value="statistical"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <!-- Enum DistributionType Definition -->
+    <xs:simpleType name="DistributionTypeType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="lognormal"/>
+            <xs:enumeration value="normal"/>
+            <xs:enumeration value="posterior"/>
+            <xs:enumeration value="studentT"/>
+            <xs:enumeration value="uniform"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

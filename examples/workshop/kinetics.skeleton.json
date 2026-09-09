@@ -1,0 +1,929 @@
+{
+  "version": "2.0",
+  "name": null,
+  "description": null,
+  "created": "2026-03-11T09:30:00Z",
+  "modified": "2026-03-11T09:30:00Z",
+  "creators": [],
+  "vessels": [
+    {
+      "id": "v_cuvette",
+      "name": null,
+      "volume": null,
+      "unit": {
+        "id": "u_ml",
+        "name": "ml",
+        "base_units": [
+          {
+            "kind": "litre",
+            "exponent": 1,
+            "scale": -3
+          }
+        ]
+      },
+      "constant": true
+    }
+  ],
+  "proteins": [
+    {
+      "id": "p_adh",
+      "constant": true,
+      "vessel_id": "v_cuvette",
+      "name": null,
+      "sequence": null,
+      "ecnumber": null,
+      "organism": null,
+      "organism_tax_id": null,
+      "references": []
+    }
+  ],
+  "complexes": [],
+  "small_molecules": [
+    {
+      "id": "s_etoh",
+      "constant": false,
+      "vessel_id": "v_cuvette",
+      "name": null,
+      "canonical_smiles": null,
+      "inchi": null,
+      "inchikey": null,
+      "synonymous_names": [],
+      "references": []
+    },
+    {
+      "id": "s_nad",
+      "constant": false,
+      "vessel_id": "v_cuvette",
+      "name": "NAD+",
+      "canonical_smiles": "C1=CC(=C[N+](=C1)[C@H]2[C@@H]([C@@H]([C@H](O2)COP(=O)([O-])OP(=O)(O)OC[C@@H]3[C@H]([C@H]([C@@H](O3)N4C=NC5=C(N=CN=C54)N)O)O)O)O)C(=O)N",
+      "inchi": "InChI=1S/C21H27N7O14P2/c22-17-12-19(25-7-24-17)28(8-26-12)21-16(32)14(30)11(41-21)6-39-44(36,37)42-43(34,35)38-5-10-13(29)15(31)20(40-10)27-3-1-2-9(4-27)18(23)33/h1-4,7-8,10-11,13-16,20-21,29-32H,5-6H2,(H5-,22,23,24,25,33,34,35,36,37)/t10-,11-,13-,14-,15-,16-,20-,21-/m1/s1",
+      "inchikey": "BAWFJGJZGIEFAR-NNYOXOHSSA-N",
+      "synonymous_names": [
+        "Nicotinamidadenindinukleotid",
+        "NAD"
+      ],
+      "references": [
+        "https://pubchem.ncbi.nlm.nih.gov/compound/5892"
+      ]
+    },
+    {
+      "id": "s_acetald",
+      "constant": false,
+      "vessel_id": "v_cuvette",
+      "name": null,
+      "canonical_smiles": null,
+      "inchi": null,
+      "inchikey": null,
+      "synonymous_names": [],
+      "references": []
+    },
+    {
+      "id": "s_nadh",
+      "constant": false,
+      "vessel_id": "v_cuvette",
+      "name": "NADH",
+      "canonical_smiles": "C1C=CN(C=C1C(=O)N)[C@H]2[C@@H]([C@@H]([C@H](O2)COP(=O)(O)OP(=O)(O)OC[C@@H]3[C@H]([C@H]([C@@H](O3)N4C=NC5=C(N=CN=C54)N)O)O)O)O",
+      "inchi": "InChI=1S/C21H29N7O14P2/c22-17-12-19(25-7-24-17)28(8-26-12)21-16(32)14(30)11(41-21)6-39-44(36,37)42-43(34,35)38-5-10-13(29)15(31)20(40-10)27-3-1-2-9(4-27)18(23)33/h1,3-4,7-8,10-11,13-16,20-21,29-32H,2,5-6H2,(H2,23,33)(H,34,35)(H,36,37)(H2,22,24,25)/t10-,11-,13-,14-,15-,16-,20-,21-/m1/s1",
+      "inchikey": "BOPGDPNILDQYTO-NNYOXOHSSA-N",
+      "synonymous_names": [
+        "Nicotinamidadenindinukleotid, reduziert"
+      ],
+      "references": [
+        "https://pubchem.ncbi.nlm.nih.gov/compound/439153"
+      ]
+    }
+  ],
+  "reactions": [
+    {
+      "id": "r_adh",
+      "name": "Ethanoloxidation",
+      "reversible": false,
+      "kinetic_law": {
+        "species_id": "s_etoh",
+        "equation": "k_cat * p_adh * s_etoh / (K_m + s_etoh)",
+        "equation_type": "rateLaw",
+        "variables": [
+          {
+            "id": "s_etoh",
+            "name": "Ethanol",
+            "symbol": "s_etoh"
+          }
+        ]
+      },
+      "reactants": [
+        {
+          "species_id": "s_etoh",
+          "stoichiometry": 1.0
+        },
+        {
+          "species_id": "s_nad",
+          "stoichiometry": 1.0
+        }
+      ],
+      "products": [
+        {
+          "species_id": "s_acetald",
+          "stoichiometry": 1.0
+        },
+        {
+          "species_id": "s_nadh",
+          "stoichiometry": 1.0
+        }
+      ],
+      "modifiers": [
+        {
+          "species_id": "p_adh",
+          "role": "biocatalyst"
+        }
+      ]
+    }
+  ],
+  "measurements": [
+    {
+      "id": "m0",
+      "name": null,
+      "group_id": null,
+      "ph": null,
+      "temperature": null,
+      "temperature_unit": {
+        "id": "u_celsius",
+        "name": "°C",
+        "base_units": [
+          {
+            "kind": "celsius",
+            "exponent": 1
+          }
+        ]
+      },
+      "species_data": [
+        {
+          "species_id": "s_etoh",
+          "initial": 2.0,
+          "prepared": 2.0,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [
+            0.0,
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0,
+            12.0,
+            14.0,
+            16.0,
+            18.0,
+            20.0
+          ],
+          "data": [
+            2.0005,
+            1.9259,
+            1.8484,
+            1.7679,
+            1.6716,
+            1.6015,
+            1.4843,
+            1.465,
+            1.4112,
+            1.3318,
+            1.2932
+          ]
+        },
+        {
+          "species_id": "s_nadh",
+          "initial": 0.0,
+          "prepared": 0.0,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [
+            0.0,
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0,
+            12.0,
+            14.0,
+            16.0,
+            18.0,
+            20.0
+          ],
+          "data": [
+            0.0,
+            0.088,
+            0.1788,
+            0.2487,
+            0.3218,
+            0.4107,
+            0.4775,
+            0.5419,
+            0.6023,
+            0.6658,
+            0.7325
+          ]
+        },
+        {
+          "species_id": "s_nad",
+          "initial": 20.0,
+          "prepared": 20.0,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [],
+          "data": []
+        },
+        {
+          "species_id": "s_acetald",
+          "initial": 0.0,
+          "prepared": 0.0,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [],
+          "data": []
+        },
+        {
+          "species_id": "p_adh",
+          "initial": 0.0005,
+          "prepared": 0.0005,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [],
+          "data": []
+        }
+      ]
+    },
+    {
+      "id": "m1",
+      "name": null,
+      "group_id": null,
+      "ph": null,
+      "temperature": null,
+      "temperature_unit": {
+        "id": "u_celsius",
+        "name": "°C",
+        "base_units": [
+          {
+            "kind": "celsius",
+            "exponent": 1
+          }
+        ]
+      },
+      "species_data": [
+        {
+          "species_id": "s_etoh",
+          "initial": 8.0,
+          "prepared": 8.0,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [
+            0.0,
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0,
+            12.0,
+            14.0,
+            16.0,
+            18.0,
+            20.0
+          ],
+          "data": [
+            8.0261,
+            7.6892,
+            7.5061,
+            7.2155,
+            7.0447,
+            6.6455,
+            6.4767,
+            6.3576,
+            6.0538,
+            5.9636,
+            5.616
+          ]
+        },
+        {
+          "species_id": "s_nadh",
+          "initial": 0.0,
+          "prepared": 0.0,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [
+            0.0,
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0,
+            12.0,
+            14.0,
+            16.0,
+            18.0,
+            20.0
+          ],
+          "data": [
+            0.0,
+            0.2594,
+            0.5382,
+            0.776,
+            1.0311,
+            1.2729,
+            1.5125,
+            1.7306,
+            1.9606,
+            2.1517,
+            2.434
+          ]
+        },
+        {
+          "species_id": "s_nad",
+          "initial": 20.0,
+          "prepared": 20.0,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [],
+          "data": []
+        },
+        {
+          "species_id": "s_acetald",
+          "initial": 0.0,
+          "prepared": 0.0,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [],
+          "data": []
+        },
+        {
+          "species_id": "p_adh",
+          "initial": 0.0005,
+          "prepared": 0.0005,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [],
+          "data": []
+        }
+      ]
+    },
+    {
+      "id": "m2",
+      "name": null,
+      "group_id": null,
+      "ph": null,
+      "temperature": null,
+      "temperature_unit": {
+        "id": "u_celsius",
+        "name": "°C",
+        "base_units": [
+          {
+            "kind": "celsius",
+            "exponent": 1
+          }
+        ]
+      },
+      "species_data": [
+        {
+          "species_id": "s_etoh",
+          "initial": 18.0,
+          "prepared": 18.0,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [
+            0.0,
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0,
+            12.0,
+            14.0,
+            16.0,
+            18.0,
+            20.0
+          ],
+          "data": [
+            17.9512,
+            17.7274,
+            17.0611,
+            16.458,
+            16.159,
+            15.8312,
+            15.3315,
+            15.0873,
+            14.7459,
+            14.4231,
+            13.8758
+          ]
+        },
+        {
+          "species_id": "s_nadh",
+          "initial": 0.0,
+          "prepared": 0.0,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [
+            0.0,
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0,
+            12.0,
+            14.0,
+            16.0,
+            18.0,
+            20.0
+          ],
+          "data": [
+            0.0011,
+            0.4315,
+            0.8471,
+            1.2605,
+            1.6686,
+            2.0814,
+            2.507,
+            2.9263,
+            3.3205,
+            3.6288,
+            4.0347
+          ]
+        },
+        {
+          "species_id": "s_nad",
+          "initial": 20.0,
+          "prepared": 20.0,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [],
+          "data": []
+        },
+        {
+          "species_id": "s_acetald",
+          "initial": 0.0,
+          "prepared": 0.0,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [],
+          "data": []
+        },
+        {
+          "species_id": "p_adh",
+          "initial": 0.0005,
+          "prepared": 0.0005,
+          "data_type": "concentration",
+          "is_simulated": false,
+          "data_unit": {
+            "id": "u_mmol_l",
+            "name": "mmol / l",
+            "base_units": [
+              {
+                "kind": "mole",
+                "exponent": 1,
+                "scale": -3
+              },
+              {
+                "kind": "litre",
+                "exponent": -1
+              }
+            ]
+          },
+          "time_unit": {
+            "id": "u_min",
+            "name": "min",
+            "base_units": [
+              {
+                "kind": "second",
+                "exponent": 1,
+                "multiplier": 60
+              }
+            ]
+          },
+          "time": [],
+          "data": []
+        }
+      ]
+    }
+  ],
+  "equations": [
+    {
+      "species_id": "s_etoh",
+      "equation": "-k_cat * p_adh * s_etoh / (K_m + s_etoh)",
+      "equation_type": "ode",
+      "variables": [
+        {
+          "id": "s_etoh",
+          "name": "Ethanol",
+          "symbol": "s_etoh"
+        }
+      ]
+    }
+  ],
+  "parameters": [
+    {
+      "id": "k_cat",
+      "name": "k_cat",
+      "symbol": "k_cat",
+      "value": 14.0,
+      "unit": {
+        "id": "u_per_s",
+        "name": "1 / s",
+        "base_units": [
+          {
+            "kind": "second",
+            "exponent": -1
+          }
+        ]
+      },
+      "stderr": 0.6,
+      "constant": false,
+      "fit": true
+    },
+    {
+      "id": "K_m",
+      "name": "K_m",
+      "symbol": "K_m",
+      "value": 17.0,
+      "unit": {
+        "id": "u_mmol_l",
+        "name": "mmol / l",
+        "base_units": [
+          {
+            "kind": "mole",
+            "exponent": 1,
+            "scale": -3
+          },
+          {
+            "kind": "litre",
+            "exponent": -1
+          }
+        ]
+      },
+      "stderr": 1.8,
+      "constant": false,
+      "fit": true
+    }
+  ],
+  "references": []
+}

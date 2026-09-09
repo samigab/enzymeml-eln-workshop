@@ -1,0 +1,133 @@
+{
+  "version": "2.0",
+  "name": "Test",
+  "description": "Hand-written EnzymeML v2 rendition of the v1 sample document.",
+  "created": "2025-02-18T10:00:00Z",
+  "modified": "2026-07-28T12:00:00Z",
+  "creators": [
+    { "given_name": "Jan", "family_name": "Range", "mail": "jan.range@simtech.uni-stuttgart.de" }
+  ],
+  "vessels": [
+    {
+      "id": "v0", "name": "Vessel", "volume": 10.0, "constant": true,
+      "unit": { "id": "u_ml", "name": "ml", "base_units": [
+        { "kind": "litre", "exponent": 1, "scale": -3 } ] }
+    }
+  ],
+  "proteins": [
+    {
+      "id": "p0", "name": "Protein", "constant": true, "vessel_id": "v0",
+      "sequence": "HLPMV", "ecnumber": "1.1.1.1", "organism": "E.coli",
+      "organism_tax_id": "27367",
+      "references": ["https://www.uniprot.org/uniprotkb/P02357"]
+    }
+  ],
+  "complexes": [
+    { "id": "c0", "name": "Complex", "constant": false, "vessel_id": "v0",
+      "participants": ["s0", "p0"] }
+  ],
+  "small_molecules": [
+    {
+      "id": "s0", "name": "Reactant", "constant": false, "vessel_id": "v0",
+      "canonical_smiles": "[H]O[H]", "inchi": "InChI=1S/H2O/h1H2",
+      "inchikey": "XLYOFNOQVPJJNP-UHFFFAOYSA-N",
+      "synonymous_names": ["water"],
+      "references": ["https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:09823"]
+    },
+    {
+      "id": "s1", "name": "Reactant2", "constant": false, "vessel_id": "v0",
+      "canonical_smiles": "[H]O[H]", "inchi": "InChI=1S/H2O/h1H2",
+      "inchikey": "XLYOFNOQVPJJNP-UHFFFAOYSA-N"
+    }
+  ],
+  "reactions": [
+    {
+      "id": "r0", "name": "Reaction", "reversible": true,
+      "kinetic_law": {
+        "species_id": "s0", "equation": "x * s0", "equation_type": "rateLaw",
+        "variables": [{ "id": "s0", "name": "Reactant", "symbol": "s0" }]
+      },
+      "reactants": [{ "species_id": "s0", "stoichiometry": 1.0 }],
+      "products": [{ "species_id": "s1", "stoichiometry": 1.0 }],
+      "modifiers": [{ "species_id": "p0", "role": "biocatalyst" }]
+    }
+  ],
+  "measurements": [
+    {
+      "id": "m0", "name": "SomeMeasurement", "group_id": "g0",
+      "ph": 7.0, "temperature": 310.15,
+      "temperature_unit": { "id": "u_K", "name": "K", "base_units": [
+        { "kind": "kelvin", "exponent": 1 } ] },
+      "species_data": [
+        {
+          "species_id": "s0", "prepared": 10.0, "initial": 10.0,
+          "data_type": "concentration", "is_simulated": false,
+          "data_unit": { "id": "u_mM", "name": "mmol / l", "base_units": [
+            { "kind": "mole", "exponent": 1, "scale": -3 },
+            { "kind": "litre", "exponent": -1 } ] },
+          "time_unit": { "id": "u_s", "name": "s", "base_units": [
+            { "kind": "second", "exponent": 1 } ] },
+          "time": [0.0, 1.0, 2.0, 3.0, 4.0],
+          "data": [10.0, 7.4, 5.5, 4.1, 3.0]
+        },
+        {
+          "species_id": "s1", "prepared": 0.0, "initial": 0.0,
+          "data_type": "concentration", "is_simulated": false,
+          "data_unit": { "id": "u_mM", "name": "mmol / l", "base_units": [
+            { "kind": "mole", "exponent": 1, "scale": -3 },
+            { "kind": "litre", "exponent": -1 } ] },
+          "time_unit": { "id": "u_s", "name": "s", "base_units": [
+            { "kind": "second", "exponent": 1 } ] },
+          "time": [0.0, 1.0, 2.0, 3.0, 4.0],
+          "data": [0.0, 2.6, 4.5, 5.9, 7.0]
+        },
+        {
+          "species_id": "p0", "prepared": 0.5, "initial": 0.5,
+          "data_type": "concentration", "is_simulated": false,
+          "data_unit": { "id": "u_mM", "name": "mmol / l", "base_units": [
+            { "kind": "mole", "exponent": 1, "scale": -3 },
+            { "kind": "litre", "exponent": -1 } ] },
+          "time_unit": { "id": "u_s", "name": "s", "base_units": [
+            { "kind": "second", "exponent": 1 } ] },
+          "time": [0.0, 1.0, 2.0, 3.0, 4.0],
+          "data": [0.5, 0.5, 0.5, 0.5, 0.5]
+        }
+      ]
+    },
+    {
+      "id": "m1", "name": "SecondMeasurement", "group_id": "g0",
+      "ph": 8.0, "temperature": 298.15,
+      "temperature_unit": { "id": "u_K", "name": "K", "base_units": [
+        { "kind": "kelvin", "exponent": 1 } ] },
+      "species_data": [
+        {
+          "species_id": "s0", "initial": 5.0,
+          "data_type": "concentration", "is_simulated": true,
+          "data_unit": { "id": "u_mM", "name": "mmol / l", "base_units": [
+            { "kind": "mole", "exponent": 1, "scale": -3 },
+            { "kind": "litre", "exponent": -1 } ] },
+          "time_unit": { "id": "u_s", "name": "s", "base_units": [
+            { "kind": "second", "exponent": 1 } ] },
+          "time": [0.0, 2.0, 4.0],
+          "data": [5.0, 3.1, 1.9]
+        }
+      ]
+    }
+  ],
+  "equations": [
+    {
+      "species_id": "s0", "equation": "-x * s0", "equation_type": "ode",
+      "variables": [{ "id": "s0", "name": "Reactant", "symbol": "s0" }]
+    }
+  ],
+  "parameters": [
+    {
+      "id": "x", "name": "x", "symbol": "x", "value": 0.3,
+      "initial_value": 10.0, "lower_bound": 0.0, "upper_bound": 100.0,
+      "stderr": 0.02, "fit": true, "constant": false,
+      "unit": { "id": "u_per_s", "name": "1 / s", "base_units": [
+        { "kind": "second", "exponent": -1 } ] }
+    }
+  ],
+  "references": ["https://doi.org/10.1234/example", "PubMed:12345678"]
+}

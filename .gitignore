@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+
+# marimo drops session and layout caches next to the notebook
+__marimo__/
+
+# generated packages and the documents read back out of them
+*.eln
+/out/*
+!/out/.gitkeep
+/back.json
+/raw.json
+/done.json

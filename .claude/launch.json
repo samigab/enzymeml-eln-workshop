@@ -1,0 +1,77 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "step0-build-document",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "marimo",
+        "run",
+        "notebooks/00_build_document.py",
+        "--headless",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "2718",
+        "--no-token"
+      ],
+      "port": 2718
+    },
+    {
+      "name": "step1-export-eln",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "marimo",
+        "run",
+        "notebooks/01_export_eln.py",
+        "--headless",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "2719",
+        "--no-token"
+      ],
+      "port": 2719
+    },
+    {
+      "name": "step2-retrieve",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "--group",
+        "api",
+        "marimo",
+        "run",
+        "notebooks/02_retrieve.py",
+        "--headless",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "2720",
+        "--no-token"
+      ],
+      "port": 2720
+    },
+    {
+      "name": "step3-update",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "--group",
+        "api",
+        "marimo",
+        "run",
+        "notebooks/03_update.py",
+        "--headless",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "2721",
+        "--no-token"
+      ],
+      "port": 2721
+    }
+  ]
+}
