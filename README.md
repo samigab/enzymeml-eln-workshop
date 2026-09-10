@@ -189,7 +189,7 @@ because each stays useful on its own:
 
 | Notebook | What it does | What it does *not* know |
 |---|---|---|
-| `00_build_document.py` | a form in eight blocks: document → vessel → registries → molecules → proteins → reaction → measurements → assemble | that lab notebooks exist |
+| `00_build_document.py` | reads three CSVs and builds an EnzymeML document around them, one step per question the files cannot answer | that lab notebooks exist |
 | `01_export_eln.py` | upload a document → provenance form → `.eln` with extra fields, preview, round-trip | where the document came from |
 | `02_retrieve.py` | connect to an instance, search it, turn entries back into documents, compare side by side | how the entries got there |
 | `03_update.py` | write a corrected document back onto the **same** entry — show the plan, check for drift, send on a button press | what was changed in the document |
@@ -198,14 +198,30 @@ That indifference is the point: the adapter hangs off a *format*, not a tool.
 Whoever already has an EnzymeML or FAIRFluids document starts at step 1;
 whoever has none builds one in step 0.
 
-Step 0 is a form, not a script: every block is a table that grows, and blocks
-4–6 are pre-filled from two identifiers (Rhea, UniProt). The same notebook
-therefore carries a foreign experiment as well — drop your own CSVs in at the
-top, type your own species, done. The workshop instructions with the concrete
-values of the example dataset sit in blue boxes and can be skipped. **No
-kinetic model**: rate laws and fits have a session of their own, and the
-question *what did you measure* stays cleaner when it is not mixed with *what
-does it mean*.
+Step 0 starts where a measurement really ends: **three CSV files**, 99 numbers
+and three column headings. It then names the seven things those files cannot
+say, and spends one step on each —
+
+1. **the files** — read them, count what is in them
+2. **the gap** — the seven questions, as a live checklist
+3. **what the columns are** — species from Rhea and UniProt, then each column
+   bound to one of them, with its unit
+4. **where, and under what conditions** — vessel, pH, temperature, which runs
+   belong together
+5. **what was in the vessel but never measured** — initial concentrations
+6. **what reaction this is** — including the one row no database gave you:
+   *this* protein catalyses *this* reaction
+7. **who measured it, and by what method**
+8. **the document** — assemble, review, download
+
+The checklist at the top counts the answers down as you supply them, so the
+notebook always shows both what has been built and what is still missing. Every
+table grows, so the same notebook carries a foreign experiment as well — drop
+your own CSVs on the box in step 1 and work down the same seven questions. The
+workshop instructions with the concrete values of the example dataset sit in
+blue boxes and can be skipped. **No kinetic model**: rate laws and fits have a
+session of their own, and the question *what did you measure* stays cleaner when
+it is not mixed with *what does it mean*.
 
 Step 1 starts **empty** — without an upload there is nothing to see, because
 every number in it comes from the uploaded document rather than from a built-in

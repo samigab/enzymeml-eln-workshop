@@ -30,26 +30,34 @@ uv run --group api marimo edit notebooks/02_retrieve.py      # step 2
 uv run --group api marimo edit notebooks/03_update.py        # step 3
 ```
 
-**Step 0** is a form, filled in block by block, that builds an EnzymeML v2
-document in front of you. Every block is a table that grows, so the same
-notebook works for this experiment and for one of your own:
+**Step 0** starts with the three CSV files and builds an EnzymeML v2 document
+around them. It opens by counting what is actually in those files — 33 rows,
+three column headings, 99 numbers — and then names the seven things they cannot
+say. One step per question, and a checklist at the top that counts them down as
+you answer them:
 
-1. **the document** — title, description, who did it, references
-2. **vessels** — and why `ml` comes back as *litre, exponent 1, scale −3*
-3. **the registries** — two identifiers instead of typing: `RHEA:25290` yields
-   the whole reaction with all five molecules and their InChIKeys, `P00330`
-   yields the enzyme with EC number, organism and sequence. Whatever comes back
-   seeds blocks 4–6, where you can still correct it. A switch turns the fetchers
-   off and shows the alternative — the same information typed out by hand, which
-   is also the fallback when the wifi gives up
-4. **small molecules** and 5. **proteins** — one row per species
-6. **the reaction** — one row per participant, including the one row no database
-   gave you: *this* protein catalyses *this* reaction. Delete it and look at
-   what is left
-7. **the measurements** — CSVs in, then three forms for what the numbers do not
-   say: which column is which species, what the conditions were, and what was in
-   the vessel without being followed
-8. **assemble**, with a list of what is still blank
+1. **the files** — drop your own CSVs here, or use the three bundled ones
+2. **the gap** — the seven questions, live
+3. **what the columns are** — `RHEA:25290` yields the whole reaction with all
+   five molecules and their InChIKeys, `P00330` the enzyme with EC number,
+   organism and sequence. A switch turns the fetchers off and shows the
+   alternative: the same information typed out by hand, which is also the
+   fallback when the wifi gives up. Then every column is bound to one species,
+   with a unit — `nadh_mmol_per_l → nadh_2` is the whole exercise in one line
+4. **where, and under what conditions** — the vessel (and why `ml` comes back as
+   *litre, exponent 1, scale −3*), pH, temperature, and the series ID that turns
+   three files into one experiment
+5. **what was in the vessel but never measured** — the enzyme has no column, and
+   leaving it out reads as *there was no enzyme in the cuvette*
+6. **what reaction this is** — one row per participant, including the one row no
+   database gave you: *this* protein catalyses *this* reaction. Delete it and
+   look at what is left
+7. **who measured it, and by what method**
+8. **the document** — assembled, reviewed, and checked against the same seven
+   questions it opened with
+
+Every table grows, so the same notebook works for this experiment and for one of
+your own.
 
 There is **no kinetic model**. Rate laws, parameters and fits are a session of
 their own; leaving them out here keeps *what did you measure* apart from *what

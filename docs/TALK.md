@@ -620,11 +620,18 @@ entries are visible to all; only update an entry you created yourself.
 browser
 
 **Say**
-The path everyone walks first. Notebook 0 builds the document block by block —
-and note that it does not know lab notebooks exist. Notebook 1 does not know
-pyenzyme wrote the file it was handed. Neither is a stage of the other.
+The path everyone walks first. Notebook 0 starts from the three CSV files and
+asks, seven times, *what can this file not tell you?* — and note that it does
+not know lab notebooks exist. Notebook 1 does not know pyenzyme wrote the file
+it was handed. Neither is a stage of the other.
 
-Two things to point out while it is on screen:
+If you are short on time, the one thing to show in notebook 0 is its opening
+count: **99 numbers, three column headings, and not one statement about what any
+of it is.** Then scroll to the checklist and let it fill in. That is slide 3
+(data vs. metadata) demonstrated rather than asserted, so if you show this you
+can shorten slide 3.
+
+Two things to point out while notebook 1 is on screen:
 
 * Notebook 1 keeps the **provenance editable**: title, description, references,
   creators. Those are the fields no instrument produces and no converter can
