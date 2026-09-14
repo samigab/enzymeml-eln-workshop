@@ -51,7 +51,7 @@ cd enzymeml-eln-workshop
 
 If you do not, take the ZIP instead. On
 [the repository page](https://github.com/samigab/enzymeml-eln-workshop) the
-green **Code** button offers **Download ZIP**; unpack it the way you unpack
+blue **Code** button offers **Download ZIP**; unpack it the way you unpack
 anything, and go into the folder, which will be called
 `enzymeml-eln-workshop-master`. The same thing without leaving the terminal:
 
