@@ -31,6 +31,9 @@ troubleshooting table; the short version is:
 ```powershell
 # Windows, in PowerShell
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Windows, if that is refused with "running scripts is disabled on this system"
+powershell -ExecutionPolicy Bypass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
 ```bash
@@ -60,8 +63,9 @@ uv sync
 
 That is everything: the converter, the four notebooks, the graph widget, the
 eLabFTW client and the conformance checker. There are no optional groups to
-remember and no virtualenv to activate. If the laptop has no suitable Python,
-uv fetches one.
+remember and no virtualenv to activate, and no Python to install first: the
+project asks for 3.12 and uv fetches exactly that, so every laptop in the
+room ends up with the same environment.
 
 Check it
 

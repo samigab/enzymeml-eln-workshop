@@ -23,6 +23,9 @@ terminal (on Windows: press the Start key, type `powershell`, press Enter):
 ```powershell
 # Windows, in PowerShell
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Windows, if that one is refused with "running scripts is disabled"
+powershell -ExecutionPolicy Bypass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
 ```bash
@@ -79,11 +82,15 @@ uv sync
 ```
 
 That is the whole installation. It creates `.venv/`, installs the exact
-versions pinned in `uv.lock`, and fetches a suitable Python (3.11 or newer) if
-the system one is too old or missing. There is nothing optional to remember:
-one list of dependencies covers the converter, all four notebooks, the graph
-widget, the eLabFTW client and the conformance suite. Every command in this
-README works from here on.
+versions pinned in `uv.lock`, and fetches **Python 3.12** for the project,
+whatever the machine happens to have. The project asks for that one minor
+version rather than a floor, so the environment is the same everywhere: a
+laptop carrying a very new Python, 3.14 say, would otherwise get an
+untested one, and find out through a wheel that does not exist yet, halfway
+through the install. There is nothing optional to remember either: one list of
+dependencies covers the converter, all four notebooks, the graph widget, the
+eLabFTW client and the conformance suite. Every command in this README works
+from here on.
 
 **4. Check that it worked:**
 
@@ -107,10 +114,10 @@ doing that at once is what conference wifi is worst at.
 |---|---|
 | `uv: command not found`, or PowerShell says `uv` is not recognised | The terminal predates the installer. Close it, open a new one. |
 | `git: command not found` | You do not need git. Take the ZIP route in step 2. |
-| Windows: `running scripts is disabled on this system` | PowerShell's execution policy. Run `Set-ExecutionPolicy -Scope Process RemoteSigned` in that window, then the install line again. |
+| Windows: `running scripts is disabled on this system` | PowerShell's execution policy. Use the second install line above, the one with `-ExecutionPolicy Bypass`. It applies to that one command and changes nothing about the machine. |
 | Windows: the unpacked folder contains one folder of the same name | Windows Explorer nests an extra level. Keep going down until you see `pyproject.toml`, and run `uv sync` there. |
 | macOS: `curl: command not found` | Install Apple's command line tools once: `xcode-select --install`. |
-| `error: The requested interpreter resolved to Python 3.10` | `uv python install 3.12`, then `uv sync` again. |
+| Anything about the interpreter version | The project pins Python 3.12 and uv fetches it. If it complains anyway: `uv python install 3.12`, then `uv sync` again. |
 | `ModuleNotFoundError` for anything at all | The command was run outside the project folder, or without `uv run`. Both are required: `cd` into the folder holding `pyproject.toml`, then `uv run ...`. |
 | The graph panel stays blank | Reload the tab once. The view mounts before its first data arrives, and a restored session can leave it waiting. |
 | Port already in use | Another notebook is still running. Close its tab and stop it with `Ctrl-C`, or pass `--port 2799`. |

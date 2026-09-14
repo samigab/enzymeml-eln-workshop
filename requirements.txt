@@ -14,7 +14,8 @@
 #     pip install -e .              # for `import eln` and `import modelgraph`
 #     marimo edit notebooks/00_build_document.py
 #
-# Python 3.11 or newer: pyenzyme and current matplotlib both require it.
+# Python 3.12. pyenzyme needs at least 3.11, and the project pins 3.12 so that
+# every install is the same one; a newer Python is where the wheels run out.
 #
 # Nothing here is optional and nothing is commented out. The four steps of the
 # workshop are one thing to install, not four, and a participant discovering in
