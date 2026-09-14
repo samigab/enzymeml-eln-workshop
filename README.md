@@ -274,6 +274,16 @@ whole log rather than mutated. Undo is `log[:-1]`; the history slider is
 `log[:n]`; both come free. Click a node to see its properties, edit them in
 place, and watch the change travel object → JSON → graph.
 
+Step **8, *the numbers*,** is the only step that adds data, and it is the only
+one that opens an input box for it: drop a CSV on it — first column the time
+axis, one column per species after it — or paste two columns in by hand. The
+file is read when you press *Add SpeciesData*, not before, so filling in the
+form and choosing a column never disturb each other, and it is emptied
+afterwards so the next entry cannot silently inherit the previous one's series.
+Rows that do not parse are skipped **and counted**, because a file quietly
+losing three points on the way into a document is the failure the whole
+workshop is about.
+
 Run the toy version first if you are demonstrating this to a room —
 `00_model_graph_toy.py` is a company, its departments and its employees, five
 classes with no chemistry in the way. The engine underneath is the same file;

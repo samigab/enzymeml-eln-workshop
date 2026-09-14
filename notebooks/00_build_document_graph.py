@@ -16,6 +16,8 @@ def _():
 
 @app.cell(hide_code=True)
 def _():
+    import csv
+    import io
     import json
 
     from modelgraph import Step, forms, layout, next_key, replay
@@ -40,8 +42,10 @@ def _():
         Step,
         build_document,
         choices,
+        csv,
         forms,
         graph_of,
+        io,
         json,
         label_for,
         layout,
@@ -303,10 +307,12 @@ def _(STEPS, mo):
 @app.cell(hide_code=True)
 def _(
     FIELDS,
+    PICKED,
     SINGLETONS,
     STEPS,
     Step,
     choices,
+    csv_drop,
     cursor,
     entities,
     forms,
@@ -314,8 +320,9 @@ def _(
     log,
     mo,
     next_key,
-    parse_series,
+    pending_series,
     picker,
+    set_drop,
     set_log,
     t_series,
 ):
@@ -335,10 +342,17 @@ def _(
             props = forms.cleaned(form.value)
             if kind == "SpeciesData":
                 # Read at click time rather than taken as a dependency, so that
-                # typing in the paste box does not empty the forms above.
-                times, values, error = parse_series(t_series.value)
-                if not error and times:
-                    props |= {"time": times, "data": values}
+                # dropping a file or typing in the paste box does not empty the
+                # forms above.
+                series = pending_series(
+                    csv_drop.value, PICKED["column"], t_series.value
+                )
+                if not series["error"] and series["times"]:
+                    props |= {"time": series["times"], "data": series["values"]}
+                    if csv_drop.value:
+                        # Consumed. An unreadable file is left in place instead,
+                        # so the warning below it stays on screen.
+                        set_drop(lambda generation: generation + 1)
             name = props.get("name") or props.get("species_id") or props.get("id")
             step = (
                 Step("update", kind, single, props, f"{kind} **{name}** edited")
@@ -375,7 +389,62 @@ def _(
 
 
 @app.cell(hide_code=True)
-def _():
+def _(csv, io):
+    def read_table(
+        payload: bytes,
+    ) -> tuple[dict[str, list[float]], int, str | None]:
+        """Columns of numbers out of a dropped CSV, header or no header.
+
+        Nothing clever: the delimiter is sniffed, a first row that does not
+        parse as numbers is taken to be the header, and rows that do not parse
+        are skipped — but counted, and the count is reported, because a file
+        quietly losing three rows on the way into a document is the exact
+        failure this whole workshop is about. A file that needs more than this
+        belongs in [notebook 0](00_build_document.py), which uses pandas.
+        """
+
+        def numbers(row: list[str]) -> list[float] | None:
+            try:
+                return [float(cell) for cell in row]
+            except ValueError:
+                return None
+
+        text = payload.decode("utf-8-sig", errors="replace")
+        try:
+            delimiter = csv.Sniffer().sniff(text[:4096], ",;\t ").delimiter
+        except csv.Error:
+            delimiter = ","
+        rows = [
+            row
+            for row in csv.reader(io.StringIO(text), delimiter=delimiter)
+            if any(cell.strip() for cell in row)
+        ]
+        if not rows:
+            return {}, 0, "the file has no rows"
+        if numbers(rows[0]) is None:
+            names = [
+                cell.strip() or f"column {i}" for i, cell in enumerate(rows[0], 1)
+            ]
+            body = rows[1:]
+        else:
+            names = [f"column {i}" for i in range(1, len(rows[0]) + 1)]
+            body = rows
+        if len(names) < 2:
+            return {}, 0, "one column only — a time axis and a series are needed"
+
+        skipped = 0
+        columns: dict[str, list[float]] = {name: [] for name in names}
+        for row in body:
+            parsed = numbers(row[: len(names)])
+            if parsed is None or len(parsed) < len(names):
+                skipped += 1
+                continue
+            for name, value in zip(names, parsed):
+                columns[name].append(value)
+        if not columns[names[0]]:
+            return {}, skipped, "no rows of numbers under the header"
+        return columns, skipped, None
+
     def parse_series(text: str) -> tuple[list[float], list[float], str | None]:
         """Numbers out of whatever the participant pasted.
 
@@ -402,7 +471,72 @@ def _():
         except ValueError as exc:
             return [], [], str(exc)
 
-    return (parse_series,)
+    def pending_series(uploads, column: str | None, text: str) -> dict:
+        """The numbers the next **SpeciesData** will carry, whatever the source.
+
+        A dropped file wins over the paste box. Both are read here rather than
+        in the Add callback, so the preview under the drop area and the numbers
+        that actually land in the document cannot disagree.
+        """
+        if uploads:
+            upload = uploads[0]
+            columns, skipped, error = read_table(upload.contents)
+            if error:
+                return {"times": [], "values": [], "columns": [], "used": None,
+                        "source": f"`{upload.name}`", "error": error}
+            time_name, *value_names = list(columns)
+            used = column if column in value_names else value_names[0]
+            return {
+                "times": columns[time_name],
+                "values": columns[used],
+                "columns": value_names,
+                "used": used,
+                "source": f"`{upload.name}` — `{time_name}` × `{used}`"
+                + (f", {skipped} unreadable row(s) skipped" if skipped else ""),
+                "error": None,
+            }
+        times, values, error = parse_series(text)
+        return {"times": times, "values": values, "columns": [], "used": None,
+                "source": "the paste box", "error": error}
+
+    return parse_series, pending_series
+
+
+@app.cell(hide_code=True)
+def _():
+    # Which column of the dropped CSV belongs to the species being added. The
+    # Add button has to know, and it has to learn it *without* depending on the
+    # dropdown: a cell that references a UI element — or a `mo.state` getter —
+    # is re-run when that element changes, and re-running the cell with the
+    # forms in it would empty the form you are filling in. A plain dict written
+    # from the dropdown's `on_change` carries the choice across without
+    # appearing in the dependency graph at all.
+    PICKED = {"column": None}
+    return (PICKED,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    get_drop, set_drop = mo.state(0)
+    return get_drop, set_drop
+
+
+@app.cell(hide_code=True)
+def _(get_drop, mo):
+    # There is no `csv_drop.value = []`: the only way to empty a file element is
+    # to build a new one. Hence the generation counter — adding a SpeciesData
+    # bumps it, this cell re-runs, and the box comes back empty. That is what
+    # "consumed" means here, and it stops the next SpeciesData from silently
+    # inheriting the previous one's numbers.
+    _generation = get_drop()
+    csv_drop = mo.ui.file(
+        filetypes=[".csv", ".tsv", ".txt"],
+        multiple=False,
+        kind="area",
+        label="Drop a CSV here — first column the time axis, one column per "
+        "species after it",
+    )
+    return (csv_drop,)
 
 
 @app.cell(hide_code=True)
@@ -421,33 +555,97 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo, parse_series, t_series):
-    _times, _values, _error = parse_series(t_series.value)
+def _(PICKED, csv_drop, mo, pending_series, picker, t_series):
+    # Shown under step 8 and nowhere else — the numbers are what that step is
+    # about, and the box is noise under the other eight. Hiding is free: both
+    # input elements are built in cells of their own, so stepping away and
+    # coming back does not lose what you dropped or pasted.
+    #
+    # `col_pick` is a plain global rather than something inside the layout,
+    # because marimo only synchronises elements bound to a name. It is `None`
+    # while no file with more than one value column is waiting.
+    col_pick = None
 
-    mo.vstack(
-        [
-            mo.md(
-                """
-                ### The numbers
+    if picker.value != "SpeciesData":
+        _view = mo.md("")
+    else:
+        _series = pending_series(csv_drop.value, PICKED["column"], t_series.value)
+        if _series["columns"]:
+            # The fallback inside `pending_series` may have moved the choice on
+            # (a new file without the previously picked column); keep the dict
+            # the button reads in step with what is on screen.
+            PICKED["column"] = _series["used"]
 
-                Paste a time series here and it is attached to the next
-                **SpeciesData** you add. Leave it empty and that entry records
-                only an initial concentration — which is still data: you
-                pipetted it, you just did not follow it.
-                """
-            ),
-            t_series,
-            mo.callout(
-                mo.md(f"**Could not read the numbers**\n\n> `{_error}`"), kind="warn"
+            def _remember(column):
+                PICKED["column"] = column
+
+            col_pick = mo.ui.dropdown(
+                options=_series["columns"],
+                value=_series["used"],
+                on_change=_remember,
+                label="**Which column is this species?** — one `SpeciesData` "
+                "per column, so drop the file once and add it twice",
             )
-            if _error
+
+        _view = mo.vstack(
+            [
+                mo.md(
+                    """
+                    ### The numbers
+
+                    Drop a CSV or paste a time series here, and it is attached
+                    to the next **SpeciesData** you add — the file is read when
+                    you press the button, not before, and emptied afterwards.
+                    Leave both empty and that entry records only an initial
+                    concentration, which is still data: you pipetted it, you
+                    just did not follow it.
+                    """
+                ),
+                csv_drop,
+                col_pick if col_pick is not None else mo.md(""),
+                mo.md("*…or paste the numbers instead — a dropped file wins.*"),
+                t_series,
+            ],
+            gap=0.6,
+        )
+
+    _view
+    return (col_pick,)
+
+
+@app.cell(hide_code=True)
+def _(col_pick, csv_drop, mo, pending_series, picker, t_series):
+    # The preview is its own cell because the cell that *creates* the column
+    # dropdown is not re-run when you use it. Reading `col_pick.value` here
+    # means this line follows the choice, while the forms — which reference
+    # neither — stay put.
+    if picker.value != "SpeciesData":
+        _status = mo.md("")
+    else:
+        _pending = pending_series(
+            csv_drop.value,
+            col_pick.value if col_pick is not None else None,
+            t_series.value,
+        )
+        _status = (
+            mo.callout(
+                mo.md(
+                    f"**Could not read {_pending['source']}**\n\n"
+                    f"> `{_pending['error']}`"
+                ),
+                kind="warn",
+            )
+            if _pending["error"]
             else mo.md(
-                f"✅ &nbsp;**{len(_times)} point(s)** ready to attach."
-                if _times
-                else "*Empty — the next SpeciesData will carry an initial value only.*"
-            ),
-        ]
-    )
+                f"✅ &nbsp;**{len(_pending['times'])} point(s)** from "
+                f"{_pending['source']}, ready to attach."
+                if _pending["times"]
+                else "*Empty — the next SpeciesData will carry an initial "
+                "value only.*"
+            )
+        )
+
+    _status
     return
 
 
@@ -506,14 +704,23 @@ def _(doc, json, mo):
                 it came from.
                 """
             ),
-            mo.ui.tabs(
+            # Folded away, like the other "look at the data" views in the
+            # workshop: the point of this section is the size and the download,
+            # and a screenful of JSON between them buries both.
+            mo.accordion(
                 {
-                    "Tree": mo.json(_document),
-                    "Raw JSON": mo.md(
-                        "```json\n"
-                        + json.dumps(_document, indent=2, ensure_ascii=False)
-                        + "\n```"
-                    ),
+                    "🔍 Look inside the file": mo.ui.tabs(
+                        {
+                            "Tree": mo.json(_document),
+                            "Raw JSON": mo.md(
+                                "```json\n"
+                                + json.dumps(
+                                    _document, indent=2, ensure_ascii=False
+                                )
+                                + "\n```"
+                            ),
+                        }
+                    )
                 }
             ),
             mo.download(
