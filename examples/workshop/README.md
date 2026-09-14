@@ -193,7 +193,7 @@ before uploading anything:
 **1. See what is missing**
 
 ```bash
-uv run workshop_todo.py examples/workshop/kinetics.skeleton.json
+uv run test/workshop_todo.py examples/workshop/kinetics.skeleton.json
 ```
 
 36 open metadata fields, grouped by section, each with a hint about what belongs
@@ -261,7 +261,7 @@ unchanged. Nothing had to be maintained twice.
 **6. Have someone else grade it**
 
 ```bash
-uv run --group checks conformance.py done.eln
+uv run --group checks test/conformance.py done.eln
 ```
 
 This runs the ELN Consortium's own conformance suite — the same code behind

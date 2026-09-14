@@ -23,7 +23,7 @@ from pathlib import Path
 # in — silenced here rather than patched there. See vendor/elnconsortium/README.
 warnings.filterwarnings("ignore", category=SyntaxWarning)
 
-VENDOR = Path(__file__).resolve().parent / "vendor" / "elnconsortium"
+VENDOR = Path(__file__).resolve().parent.parent / "vendor" / "elnconsortium"
 
 # Failures we have looked at and decided not to chase. Each entry is
 # (check label, substring, reason); a check whose every complaint matches one of

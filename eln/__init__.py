@@ -11,7 +11,7 @@ the mapping can be checked against the original.
 
 Typical use::
 
-    python -m eln fairfluids.json -o urea_water.eln --links
+    python -m eln sourcefiles/fairfluids.json -o urea_water.eln --links
     python -m eln enzymeml.json  -o kinetics.eln --grain measurement
     python -m eln kinetics.eln   -o back.json --from entries
 """

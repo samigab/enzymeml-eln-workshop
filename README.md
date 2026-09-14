@@ -48,7 +48,7 @@ system one is too old — you do not have to install Python yourself.
 
 ```bash
 uv run python -m eln examples/workshop/kinetics.solution.json -o out/kinetics.eln
-uv run verify_eln.py out/kinetics.eln
+uv run test/verify_eln.py out/kinetics.eln
 ```
 
 ```
@@ -121,14 +121,14 @@ back.
 ```bash
 uv run python -m eln --help
 
-uv run python -m eln fairfluids.json -o out/urea_water.eln --links
+uv run python -m eln sourcefiles/fairfluids.json -o out/urea_water.eln --links
 uv run python -m eln examples/enzymeml_v2.example.json -o out/kinetics.eln --links
-uv run verify_eln.py out/urea_water.eln
+uv run test/verify_eln.py out/urea_water.eln
 
 uv run python -m eln out/kinetics.eln -o back.json --from entries \
     --against examples/enzymeml_v2.example.json
-uv run roundtrip_eln.py examples/enzymeml_v2.example.json
-uv run conformance.py out/kinetics.eln
+uv run test/roundtrip_eln.py examples/enzymeml_v2.example.json
+uv run test/conformance.py out/kinetics.eln
 ```
 
 Export (`.json` in):
@@ -322,7 +322,7 @@ uv run marimo edit notebooks/00_build_document.py
 uv run marimo edit notebooks/01_export_eln.py
 uv run --group api marimo edit notebooks/02_retrieve.py   # needs elabapi-python
 uv run --group api marimo edit notebooks/03_update.py     # writes — with a button
-uv run workshop_todo.py examples/workshop/kinetics.skeleton.json   # editor variant
+uv run test/workshop_todo.py examples/workshop/kinetics.skeleton.json   # editor variant
 ```
 
 `examples/workshop/` holds the hands-on dataset: the three raw CSVs plus an ADH
@@ -332,16 +332,13 @@ text variant and shows which fields are still open — JSON has no comments, so
 the assignment lives there. Sequence and didactics:
 [examples/workshop/README.md](examples/workshop/README.md).
 
-Slide-by-slide speaker notes for the accompanying talk:
-[docs/TALK.md](docs/TALK.md).
-
 ## Round-trip
 
 Metadata in the ELN is only worth something if the data comes back out. That
 can be checked rather than claimed:
 
 ```
-$ uv run roundtrip_eln.py examples/enzymeml_v2.example.json fairfluids.json
+$ uv run test/roundtrip_eln.py examples/enzymeml_v2.example.json sourcefiles/fairfluids.json
 
 === enzymeml_v2.example.json ===
   source   identical
@@ -507,7 +504,7 @@ their web checker:
 
 ```bash
 uv sync --group checks
-uv run conformance.py out/kinetics.eln
+uv run test/conformance.py out/kinetics.eln
 ```
 
 ```
@@ -550,7 +547,7 @@ A v1 document is rejected with an explicit message instead of silently
 producing empty entries:
 
 ```
-$ uv run python -m eln enzymeML.json -o out.eln
+$ uv run python -m eln sourcefiles/enzymeML.json -o out.eln
 error: This looks like an EnzymeML v1 document, but this converter targets
 EnzymeML v2 as defined by enzymeML.xsd.
   v1 markers found: creators (object instead of list), level, pubmedid, reactants, …
@@ -584,11 +581,13 @@ modelgraph/forms.py    marimo inputs generated from the field declarations
 modelgraph/toy.py      the five-class demo model (phase 1)
 modelgraph/enzymeml.py the same declarations against pyenzyme (phase 2)
 
-verify_eln.py      structural check of a generated .eln (our expectations)
-conformance.py     the same file, graded by the ELN Consortium's suite
-roundtrip_eln.py   export → import → diff, per route
-workshop_todo.py   which metadata fields of a document are still open
-vendor/            foreign code, verbatim and pinned — do not edit
+test/verify_eln.py     structural check of a generated .eln (our expectations)
+test/conformance.py    the same file, graded by the ELN Consortium's suite
+test/roundtrip_eln.py  export → import → diff, per route
+test/workshop_todo.py  which metadata fields of a document are still open
+test/seed_demo.py      fills an instance with plausible documents, for a demo
+sourcefiles/           the upstream schemas and the documents bundled with them
+vendor/                foreign code, verbatim and pinned — do not edit
 ```
 
 Wiring up a new schema means: write a module with `SCHEMA`, `PUBLISHER`,
