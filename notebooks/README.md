@@ -47,7 +47,7 @@ cd enzymeml-eln-workshop
 ```
 
 **Without git, which nobody needs to install for this:** open
-<https://github.com/samigab/enzymeml-eln-workshop>, press the green **Code**
+<https://github.com/samigab/enzymeml-eln-workshop>, press the blue **Code**
 button, choose **Download ZIP**, unpack it, and go into the folder called
 `enzymeml-eln-workshop-master`. The main README has the terminal version of the
 same thing.
