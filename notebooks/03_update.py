@@ -87,8 +87,13 @@ def _(mo, task, why):
             because *"attached files are immutable (change history is kept)"*.
             After an update the entry therefore lists the old `enzymeml.json`
             as archived next to the current one. That is file history, not
-            clutter — but this notebook makes sure exactly **one** of them is
-            current, and always replaces that one rather than an archived copy.
+            clutter — but it does mean an entry can hand back several documents
+            when asked for *the* document, so both directions here name the one
+            they mean: **only the current version is read**, newest first if a
+            name somehow appears twice, and a replace always targets that same
+            current upload rather than an archived copy. Reading an archived
+            version instead would compare last week's document against this
+            week's extra fields and call the difference drift.
             """,
         ),
         why(
@@ -530,9 +535,10 @@ def _(compare, edited, f_entry, mo, remote, sent, session):
 
     mo.callout(
         mo.md("### Read back from the instance: **identical**\n\n"
-              "The document was fetched again just now, from the attachment "
-              "the update wrote, and matches what you sent. The loop is "
-              "closed: document → entry → document."),
+              "The document was fetched again just now, from upload "
+              f"`{_upload['id']}` — the current `{_upload['name']}`, not one of "
+              "the archived versions beside it — and matches what you sent. "
+              "The loop is closed: document → entry → document."),
         kind="success") if not _deltas else mo.callout(
         mo.md("### Read back from the instance: **differs**\n\n"
               + "\n".join(f"- `{d}`" for d in _deltas[:20])),

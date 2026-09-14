@@ -34,9 +34,8 @@ from typing import Any, Optional
 from . import convert_document, pick
 from .crate import (Attachment, Entry, elabftw_metadata_object, inline_token,
                     splice_generated)
-from .remote import (DOCUMENT_NAMES, STATE_NORMAL, RemoteError, Session, _api,
-                     _call, _raw)
-from .remote import uploads as _uploads
+from .remote import (DOCUMENT_NAMES, RemoteError, Session, _api, _call, _raw,
+                     current_uploads)
 
 
 @dataclass(frozen=True)
@@ -139,24 +138,6 @@ def _current(session: Session, experiment_id: int) -> dict:
     }
 
 
-def _current_uploads(session: Session, experiment_id: int) -> dict:
-    """Current attachments by name — archived versions excluded.
-
-    Replacing a file archives the old one and adds a new one, so the list an
-    entry returns grows with every update. Only the Normal ones are the
-    entry's files; an archived one is a previous version, and replacing *that*
-    would add a third copy rather than update the second.
-    """
-    current: dict[str, dict] = {}
-    for upload in _uploads(session, experiment_id):
-        if upload.get("state") != STATE_NORMAL or not upload["name"]:
-            continue
-        seen = current.get(upload["name"])
-        if seen is None or (upload["id"] or 0) > (seen["id"] or 0):
-            current[upload["name"]] = upload
-    return current
-
-
 def _resolve_images(html: str, entry_id: str, current: dict) -> tuple[str, list[str]]:
     """Point the body's ``<img>`` tags at the files as this instance names them.
 
@@ -213,7 +194,7 @@ def prepare(session: Session, experiment_id: int, document: dict, *,
     entry = _entry_for(document, links=links, plots=plots, csv=csv)
     metadata = elabftw_metadata_object(entry.fields)
     current = _current(session, experiment_id)
-    current_files = _current_uploads(session, experiment_id)
+    current_files = current_uploads(session, experiment_id)
 
     # Only the fenced region is ours; anything a person wrote around it stays.
     body, fenced = splice_generated(current["body"], entry.html)
@@ -311,7 +292,7 @@ def apply(session: Session, plan: Plan, *, patch: bool = True,
             # previous version would show the file from before the update.
             body_html, missing = _resolve_images(
                 body_html, plan.entry.id if plan.entry else "document",
-                _current_uploads(session, plan.experiment_id))
+                current_uploads(session, plan.experiment_id))
             if missing:
                 done.append("note   images without an upload to point at: "
                             + ", ".join(missing))

@@ -472,8 +472,13 @@ silently":
 * **`replace` does not overwrite, it archives.** `Uploads::replace()` is
   `archive()` plus `create()` — *"attached files are immutable (change history
   is kept)"*. After an update the entry lists the previous version as archived
-  next to the current one. We therefore filter on `state == 1`, otherwise the
-  next run replaces an archived copy and creates a third.
+  next to the current one. We therefore filter on `state == 1` — on **both**
+  sides. Writing without the filter replaces an archived copy and creates a
+  third; *reading* without it is worse, because asking an updated entry for
+  "the document" can hand back last week's version, whose extra fields no
+  longer match the entry's, and step 3 then reports drift nobody caused. One
+  helper, `remote.newest_by_name`, answers both: `state == 1`, highest `id` per
+  name.
 * **`metadata` is a string, not an object — in both directions.**
   `openapi.yaml` types the field as an object, the implementation does not:
   `EntityParams` maps `'metadata' => $this->getUnfilteredContent()`, which ends

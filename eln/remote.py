@@ -312,6 +312,36 @@ def uploads(session: Session, experiment_id: int) -> list[dict]:
 STATE_NORMAL = 1
 
 
+def newest_by_name(attached: list[dict]) -> dict[str, dict]:
+    """The current version of each attachment, by name.
+
+    Two things get dropped, and both of them are old versions of a file rather
+    than a file. Replacing an attachment archives the previous one instead of
+    deleting it — deliberately, since that is what makes an update reversible —
+    so the list an entry returns grows every time it is updated, and holds
+    several uploads sharing one ``real_name``. Anything not in
+    :data:`STATE_NORMAL` is therefore ignored, and where a name still appears
+    twice the highest ``id`` wins, which is the newest.
+
+    Without this a re-read finds the *previous* document, compares it against
+    extra fields generated from the current one, and reports drift that nobody
+    caused.
+    """
+    current: dict[str, dict] = {}
+    for upload in attached:
+        if upload.get("state") != STATE_NORMAL or not upload["name"]:
+            continue
+        seen = current.get(upload["name"])
+        if seen is None or (upload["id"] or 0) > (seen["id"] or 0):
+            current[upload["name"]] = upload
+    return current
+
+
+def current_uploads(session: Session, experiment_id: int) -> dict[str, dict]:
+    """:func:`newest_by_name` of everything attached to an experiment."""
+    return newest_by_name(uploads(session, experiment_id))
+
+
 def download(session: Session, experiment_id: int, upload_id: int) -> bytes:
     """One attachment, as bytes."""
     api = _api()
@@ -338,6 +368,11 @@ def fetch_document(session: Session, experiment_id: int) -> tuple[dict, dict]:
     projection built for humans to read and search; the attachment is the
     document itself, byte for byte as the export left it. Reading back what we
     know is there beats re-deriving it from a lossy view of itself.
+
+    Only the current version of each attachment is considered — see
+    :func:`current_uploads`. An entry that has been updated carries its own
+    history, and reading the oldest copy of a document is never what the caller
+    meant by "the document attached to this entry".
     """
     attached = uploads(session, experiment_id)
     if not attached:
@@ -346,9 +381,20 @@ def fetch_document(session: Session, experiment_id: int) -> tuple[dict, dict]:
             "document. Extra fields alone cannot be turned back into one — "
             "they are a summary, not the record.")
 
-    by_name = {u["name"]: u for u in attached}
+    by_name = newest_by_name(attached)
+    if not by_name:
+        raise RemoteError(
+            f"Every attachment of experiment {experiment_id} is archived or "
+            f"deleted ({len(attached)} of them), so the entry has no current "
+            "document. An archived upload is a previous version; restore one "
+            "in eLabFTW if that is the copy you want.")
+
+    # Newest first among the fallbacks, for the same reason: if an entry
+    # carries two differently-named documents, the one written last is the one
+    # somebody meant.
     candidates = [by_name[n] for n in DOCUMENT_NAMES if n in by_name]
-    candidates += [u for u in attached
+    candidates += [u for u in sorted(by_name.values(),
+                                     key=lambda u: u["id"] or 0, reverse=True)
                    if u["name"].endswith(".json") and u not in candidates]
 
     problems = []
@@ -362,10 +408,16 @@ def fetch_document(session: Session, experiment_id: int) -> tuple[dict, dict]:
         except Exception as exc:
             problems.append(f"{upload['name']}: {exc}")
 
-    listed = ", ".join(u["name"] for u in attached) or "none"
+    # The current files only, since those are the ones that were tried — with
+    # the archived count named rather than silently dropped, so the message
+    # cannot read as "that file is not attached" when it is, as history.
+    listed = ", ".join(sorted(by_name)) or "none"
+    _archived = len(attached) - len(by_name)
     raise RemoteError(
-        f"None of the attachments of experiment {experiment_id} is an "
+        f"None of the current attachments of experiment {experiment_id} is an "
         f"EnzymeML or FAIRFluids document.\n  attachments: {listed}"
+        + (f"\n  ({_archived} archived version(s) ignored)"
+           if _archived > 0 else "")
         + ("\n  " + "\n  ".join(problems) if problems else ""))
 
 
