@@ -1,0 +1,44 @@
+# A pip-installable equivalent of what the workshop notebooks need.
+#
+# The supported path is uv, which installs the exact versions pinned in
+# uv.lock and fetches a matching Python by itself:
+#
+#     uv sync --all-groups --extra plots
+#
+# This file exists for the case uv cannot cover — a managed JupyterHub, a
+# locked-down laptop, a CI image that already has an interpreter. It is not
+# pinned, because pinning it here would be a second lockfile to keep in step
+# with the first one, and there is no mechanism that would notice when it
+# drifted.
+#
+#     python -m venv .venv && . .venv/bin/activate
+#     pip install -r requirements.txt
+#     pip install -e .              # for `import eln` and `import modelgraph`
+#     marimo run notebooks/00_build_document_graph.py
+#
+# Python 3.11 or newer: pyenzyme and current matplotlib both require it.
+
+# --- the converter itself -----------------------------------------------
+rocrate>=0.15            # the reference RO-Crate implementation; builds the .eln
+
+# --- the notebooks ------------------------------------------------------
+marimo>=0.11
+pyenzyme>=2.2            # the official EnzymeML v2 data model
+pandas>=2.0              # notebook 0 reads the CSVs with it
+matplotlib>=3.7          # optional: without it, plot.png is silently omitted
+
+# --- the live graph view (00_*_graph.py) --------------------------------
+# anywidget carries the ~300 lines of ES module in modelgraph/static. That
+# module imports nothing, so the graph keeps working on a conference wifi that
+# has stopped working.
+anywidget>=0.9
+
+# --- talking to an eLabFTW instance (notebooks 2 and 3) -----------------
+# Uncomment if you are doing the retrieval half. Exporting an .eln never makes
+# an HTTP request, so nobody who only exports needs an API client.
+# elabapi-python>=5.6
+
+# --- checking an .eln against foreign code ------------------------------
+# Uncomment for conformance.py — the ELN Consortium's own test suite.
+# jsonschema>=4
+# roc-validator

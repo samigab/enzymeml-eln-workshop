@@ -67,7 +67,7 @@ choice for the workshop; the table is for anyone who wants less.
 | Group | Command | Contains | Needed for |
 |---|---|---|---|
 | *(core)* | `uv sync` | `rocrate` | the converter and the CLI |
-| `dev` | included by default | `marimo`, `matplotlib`, `pyenzyme` | all four notebooks |
+| `dev` | included by default | `marimo`, `matplotlib`, `pyenzyme`, `anywidget` | all six notebooks |
 | `api` | `uv sync --group api` | `elabapi-python` | notebooks 2 and 3 — talking to an eLabFTW instance |
 | `checks` | `uv sync --group checks` | `jsonschema`, `roc-validator` | `conformance.py`, the ELN Consortium's own test suite |
 | `plots` (extra) | `uv sync --extra plots` | `matplotlib` | attaching `plot.png`; without it the plot is silently omitted |
@@ -84,6 +84,8 @@ install an API client.
 | `uv: command not found` after the install script | The shell has not picked up `~/.local/bin` yet. Open a new terminal. |
 | `error: The requested interpreter resolved to Python 3.10` | `uv python install 3.12`, then `uv sync --all-groups --extra plots` again. |
 | `ModuleNotFoundError: pyenzyme` in notebook 0 | Installed without the `dev` group. Re-run `uv sync --all-groups --extra plots`. |
+| `ModuleNotFoundError: modelgraph` or `anywidget` in a `_graph` notebook | Same cause, same fix. `modelgraph` ships with the project, so `uv sync` installs it. |
+| The graph panel stays blank | Reload the tab once. The view mounts before its first data arrives, and a restored session can leave it waiting. |
 | `ModuleNotFoundError: elabapi_python` in notebook 2 or 3 | Started without `--group api`. Use the commands under [Run](#run) verbatim. |
 | Port already in use | Another notebook is still running. Close its tab and stop it with `Ctrl-C`, or pass `--port 2799`. |
 | Notebook opens but shows nothing | That is correct for notebooks 1–3. They stay empty until you upload a file or connect to an instance. |
@@ -97,6 +99,15 @@ uv run marimo edit notebooks/00_build_document.py            # build a document
 uv run marimo edit notebooks/01_export_eln.py                # document → .eln
 uv run --group api marimo edit notebooks/02_retrieve.py      # eLabFTW → document
 uv run --group api marimo edit notebooks/03_update.py        # write back (with a button)
+```
+
+The [live-graph alternative to step 0](#step-0-the-other-way-round--the-live-graph)
+is best presented as an app rather than as code — `marimo run` hides the cells
+and gives the graph the whole width:
+
+```bash
+uv run marimo run notebooks/00_model_graph_toy.py            # the toy model, for the demo
+uv run marimo run notebooks/00_build_document_graph.py       # the same thing, on EnzymeML
 ```
 
 marimo prints a `http://localhost:2718` URL and opens the browser itself.
@@ -190,6 +201,8 @@ because each stays useful on its own:
 | Notebook | What it does | What it does *not* know |
 |---|---|---|
 | `00_build_document.py` | reads three CSVs and builds an EnzymeML document around them, one step per question the files cannot answer | that lab notebooks exist |
+| `00_build_document_graph.py` | *an alternative to step 0* — builds the same document one entity at a time, next to a live graph of it | that the data might have come from a file |
+| `00_model_graph_toy.py` | the same machinery on a five-class toy model, for showing how it works before any chemistry | what an enzyme is |
 | `01_export_eln.py` | upload a document → provenance form → `.eln` with extra fields, preview, round-trip | where the document came from |
 | `02_retrieve.py` | connect to an instance, search it, turn entries back into documents, compare side by side | how the entries got there |
 | `03_update.py` | write a corrected document back onto the **same** entry — show the plan, check for drift, send on a button press | what was changed in the document |
@@ -222,6 +235,49 @@ workshop instructions with the concrete values of the example dataset sit in
 blue boxes and can be skipped. **No kinetic model**: rate laws and fits have a
 session of their own, and the question *what did you measure* stays cleaner when
 it is not mixed with *what does it mean*.
+
+### Step 0, the other way round — the live graph
+
+`00_build_document_graph.py` answers a different question with the same
+library. Step 0 asks *what do the numbers not say*; this one asks **what is a
+data model actually made of** — and answers it by drawing the document while
+you build it.
+
+```
+your input  ──►  pyenzyme object  ──┬──►  JSON preview + download
+                                    └──►  graph  ──►  layout  ──►  live view
+```
+
+Everything to the right of the object is **derived**. The graph is read off the
+pydantic model with `model_fields` every time it changes, so there is no second
+copy of the data to keep in step — which is also why a bug in the drawing can
+never corrupt a document.
+
+Three kinds of edge come out of that walk, and the difference between them is
+most of what the notebook is for:
+
+| line | means | example |
+|---|---|---|
+| solid | **contains** — a field holds an object | `EnzymeMLDocument` → `Protein` |
+| dashed, amber | **references** — a field holds another object's `id` | `SmallMolecule.vessel_id` → `Vessel` |
+| dotted, faint | **is a** — an instance and its type | *Lipase* → `Protein` |
+
+The amber ones are the payload. Nothing in the JSON's nesting shows them: they
+exist only because two strings match, and they are what makes the document a
+graph rather than a tree. Types are separate nodes from instances, so four
+small molecules are four nodes pointing at one `SmallMolecule` — and for
+pyenzyme that type node carries the real JSON-LD class, `enzml:Protein`,
+`OBO:PR_000000001`.
+
+Every edit is appended to a **step log**, and the document is folded out of the
+whole log rather than mutated. Undo is `log[:-1]`; the history slider is
+`log[:n]`; both come free. Click a node to see its properties, edit them in
+place, and watch the change travel object → JSON → graph.
+
+Run the toy version first if you are demonstrating this to a room —
+`00_model_graph_toy.py` is a company, its departments and its employees, five
+classes with no chemistry in the way. The engine underneath is the same file;
+only the field declarations differ.
 
 Step 1 starts **empty** — without an upload there is nothing to see, because
 every number in it comes from the uploaded document rather than from a built-in
@@ -518,6 +574,16 @@ eln/enzymeml.py    EnzymeML v2 mapping
 eln/remote.py      read-only eLabFTW API: connect, search, fetch (notebook 2)
 eln/remote_write.py  plan/apply an update of an existing entry (notebook 3)
 eln/__main__.py    CLI
+
+modelgraph/store.py    the append-only step log, and the entities it replays into
+modelgraph/graph.py    a pydantic object → nodes and edges, by reflection
+modelgraph/layout.py   where every node goes; deterministic, so nothing jumps
+modelgraph/widget.py   the anywidget wrapper
+modelgraph/static/     ~300 lines of ES module that imports nothing
+modelgraph/forms.py    marimo inputs generated from the field declarations
+modelgraph/toy.py      the five-class demo model (phase 1)
+modelgraph/enzymeml.py the same declarations against pyenzyme (phase 2)
+
 verify_eln.py      structural check of a generated .eln (our expectations)
 conformance.py     the same file, graded by the ELN Consortium's suite
 roundtrip_eln.py   export → import → diff, per route

@@ -23,6 +23,9 @@ plots = ["matplotlib>=3.7"]
 # uv installs `dev` by default, so for the workshop this is enough:
 #   uv run marimo edit notebooks/00_build_document.py
 dev = [
+    # the graph view in notebook 0-graph is an anywidget: a few hundred lines
+    # of ES module that imports nothing, so the picture never depends on a CDN
+    "anywidget>=0.9",
     "marimo>=0.11",
     "matplotlib>=3.7",
     # the official EnzymeML v2 data model; notebook 0 builds the document with
@@ -48,4 +51,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["eln"]
+# `modelgraph` is the workshop's live model-builder; it is packaged rather than
+# left beside the notebooks so `import modelgraph` works from anywhere, the way
+# `import eln` does.
+packages = ["eln", "modelgraph"]

@@ -72,6 +72,40 @@
         "--no-token"
       ],
       "port": 2721
+    },
+    {
+      "name": "step0-toy-graph",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "marimo",
+        "run",
+        "notebooks/00_model_graph_toy.py",
+        "--headless",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "2722",
+        "--no-token"
+      ],
+      "port": 2722
+    },
+    {
+      "name": "step0-graph",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "marimo",
+        "run",
+        "notebooks/00_build_document_graph.py",
+        "--headless",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "2723",
+        "--no-token"
+      ],
+      "port": 2723
     }
   ]
 }
