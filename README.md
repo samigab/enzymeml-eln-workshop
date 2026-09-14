@@ -600,7 +600,9 @@ test/verify_eln.py     structural check of a generated .eln (our expectations)
 test/conformance.py    the same file, graded by the ELN Consortium's suite
 test/roundtrip_eln.py  export → import → diff, per route
 test/workshop_todo.py  which metadata fields of a document are still open
-test/seed_demo.py      fills an instance with plausible documents, for a demo
+test/seed_demo.py      builds examples/seed/ and pushes it to an instance
+examples/seed/         four contrasting documents, so notebook 2 has something
+                       to compare — see its README
 sourcefiles/           the upstream schemas and the documents bundled with them
 vendor/                foreign code, verbatim and pinned — do not edit
 ```

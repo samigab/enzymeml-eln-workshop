@@ -9,18 +9,29 @@ that moment falls flat — every participant imported the same workshop dataset,
 so the matrix is one column of ticks and the two-document diff says
 "identical".
 
-This script fixes that by seeding three experiments that genuinely differ:
+This script fixes that by seeding four experiments that genuinely differ:
 
-    A  yeast ADH,        ethanol   + NAD+ -> acetaldehyde + NADH,  pH 8.8
-    B  horse liver ADH,  ethanol   + NAD+ -> acetaldehyde + NADH,  pH 7.5
-    C  human LDH-A,      L-lactate + NAD+ -> pyruvate     + NADH,  pH 9.0
+    A  yeast ADH1,       ethanol      + NAD+ -> acetaldehyde + NADH,  pH 8.8
+    B  horse liver ADH,  ethanol      + NAD+ -> acetaldehyde + NADH,  pH 7.5
+    C  human LDH-A,      (S)-lactate  + NAD+ -> pyruvate     + NADH,  pH 9.0
+    D  human ALDH2,      acetaldehyde + NAD+ -> acetate      + NADH,  pH 8.0
 
-A and B share all four small molecules and differ in organism; C shares only
-the cofactors. So the matrix has shared rows, half-shared rows and unique rows
-— which is what makes it teach something. The identifiers are not typed here:
-the reactions come from Rhea and the enzymes from UniProt, which is also why
-NAD+ arrives with the same id and the same InChIKey in all three documents.
-That is the point being demonstrated, so it would be dishonest to fake it.
+Every degree of overlap appears once, which is what makes the matrix teach
+something rather than just render:
+
+    NAD+, NADH, hydron   all four        the cofactors nobody escapes
+    acetaldehyde         A, B, D         D oxidises what A and B produced
+    ethanol              A, B            same reaction, different organism
+    (S)-lactate          C               a different reaction entirely
+    acetate, water       D
+
+A and B are the same reaction measured on two enzymes, so they differ in
+organism and in nothing else structural. D is the *next step of A's pathway*:
+its substrate is A's product, and the matrix says so without anybody writing
+that down. The identifiers are not typed here — the reactions come from Rhea
+and the enzymes from UniProt, which is why acetaldehyde arrives with one id and
+one InChIKey in all three documents that contain it. That property is the whole
+point being demonstrated, so faking it would be dishonest.
 
 Usage — nothing is sent without ``--commit``::
 
@@ -30,7 +41,7 @@ Usage — nothing is sent without ``--commit``::
     # dry run against an instance: builds, plans, sends nothing
     python seed_demo.py --url https://demo.elabftw.net --key $ELAB_KEY
 
-    # actually create the three entries
+    # actually create the four entries
     python seed_demo.py --url https://demo.elabftw.net --key $ELAB_KEY --commit
 
 The measured values are simulated from Michaelis-Menten kinetics with a fixed
@@ -45,9 +56,9 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import random
 import sys
+import uuid
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Optional
@@ -59,8 +70,22 @@ from typing import Any, Optional
 # --- what to build -----------------------------------------------------------
 
 #: One dict per document. Everything a recipe does not name is shared: the
-#: vessel, the units, the time grid, the fact that NADH is what the photometer
-#: actually sees at 340 nm.
+#: vessel, the time grid, the cofactor in excess, the fact that NADH is what
+#: the photometer actually sees at 340 nm.
+#:
+#: ``k_cat`` and ``K_m`` are round numbers of the order of magnitude reported
+#: for each enzyme; they are not measurements, and every document says as much
+#: in its description. ``enzyme`` is then chosen so that 20 minutes produce a
+#: *visible* progress curve — a family that converts 40–80 % of the lowest
+#: starting concentration and less of the highest. That matters more than it
+#: sounds: with an initial-rate loading the curves move by less than the noise,
+#: the plot in the entry body looks like a broken instrument, and the dataset
+#: teaches nothing about the thing it is there to show.
+#:
+#: ``unit`` is per recipe because ALDH2 works at micromolar substrate, and
+#: writing 0.0005 mmol/l three digits wide is how you get a table nobody can
+#: read. The cofactor stays in mmol/l — which is the honest shape of a real
+#: measurement, and gives the side-by-side view two units to reconcile.
 RECIPES: list[dict[str, Any]] = [
     {
         "key": "adh_yeast",
@@ -72,8 +97,8 @@ RECIPES: list[dict[str, Any]] = [
         "ph": 8.8,
         "temperature": 25.0,
         "group_id": "dilution_series_adh_yeast",
-        # k_cat [1/min], K_m [mmol/l], enzyme [mmol/l]
-        "k_cat": 14.0, "k_m": 17.0, "enzyme": 0.0005,
+        # k_cat [1/min], K_m [unit], enzyme [unit]
+        "k_cat": 20000.0, "k_m": 17.0, "enzyme": 0.00005,
         "initials": [2.0, 8.0, 18.0],
         "day": 0,
     },
@@ -87,9 +112,27 @@ RECIPES: list[dict[str, Any]] = [
         "ph": 7.5,
         "temperature": 25.0,
         "group_id": "dilution_series_adh_horse",
-        "k_cat": 8.5, "k_m": 1.1, "enzyme": 0.0005,
+        "k_cat": 300.0, "k_m": 1.1, "enzyme": 0.0005,
         "initials": [1.0, 4.0, 12.0],
         "day": 7,
+    },
+    {
+        "key": "aldh_human",
+        "name": "ALDH kinetics: acetaldehyde oxidation by human ALDH2",
+        "rhea": "RHEA:25294",
+        "uniprot": "P05091",
+        "substrate": "acetaldehyde",
+        "product": "acetate",
+        "ph": 8.0,
+        "temperature": 30.0,
+        "group_id": "dilution_series_aldh_human",
+        # Micromolar: ALDH2 has a far higher affinity for acetaldehyde than
+        # any of the others have for their substrates, and starting
+        # concentrations around K_m is the point of the series.
+        "unit": "umol / l",
+        "k_cat": 60.0, "k_m": 1.0, "enzyme": 0.0015,
+        "initials": [0.5, 1.0, 3.0],
+        "day": 14,
     },
     {
         "key": "ldh_human",
@@ -101,13 +144,13 @@ RECIPES: list[dict[str, Any]] = [
         "ph": 9.0,
         "temperature": 25.0,
         "group_id": "dilution_series_ldh_human",
-        "k_cat": 22.0, "k_m": 4.4, "enzyme": 0.0003,
+        "k_cat": 1200.0, "k_m": 4.4, "enzyme": 0.0002,
         "initials": [1.0, 5.0, 15.0],
         "day": 21,
     },
 ]
 
-#: Shared across all three, so that differences between documents are the ones
+#: Shared across all four, so that differences between documents are the ones
 #: the recipes declare and not accidents of the vessel or the time grid.
 COFACTOR_INITIAL = 20.0          # mmol/l NAD+, in excess
 TIME_POINTS = [0.0, 1.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 15.0, 18.0, 20.0]
@@ -116,10 +159,22 @@ TIME_UNIT = "min"
 NOISE = 0.015                    # relative, on the followed species
 SEED = 20260909
 
+#: How a bench label writes the unit a measurement was run at. The document
+#: keeps the full `umol / l`; this is only for the measurement's name.
+SHORT_UNIT = {"mmol / l": "mM", "umol / l": "µM"}
+
+#: Written by the Rhea equation, not by an experimenter. Water and protons are
+#: part of the reaction and belong in the document as species; they are not
+#: things anybody pipetted or followed, and giving them a starting
+#: concentration in mmol/l — 20 mmol/l of water, at pH 8.8 — would put a
+#: chemistry error into a teaching dataset.
+UNPIPETTED = {"water", "hydron"}
+
 DESCRIPTION = (
     "{headline} Formation of NADH followed photometrically at 340 nm; the "
     "decrease of {substrate} derived from it. Three starting concentrations "
-    "around K_m, {points} time points each over {span:g} min.\n\n"
+    "spanning K_m ({initials}), {points} time points each over {span:g} min."
+    "\n\n"
     "Synthetic teaching dataset: the numbers come from a Michaelis-Menten "
     "simulation with added noise, not from a bench. The chemical and "
     "biological identifiers are real — the reaction from Rhea {rhea}, the "
@@ -177,10 +232,19 @@ def build(recipe: dict, *, creator: tuple[str, str, str],
     reaction.add_to_modifiers(species_id=protein.id,
                               role=pe.ModifierRole.CATALYST)
 
+    unit = recipe.get("unit", DATA_UNIT)
     by_name = {m.name: m for m in molecules}
     substrate = by_name[recipe["substrate"]]
     product = by_name[recipe["product"]]
-    cofactors = [m for m in molecules if m is not substrate and m is not product]
+    cofactors = [m for m in molecules
+                 if m is not substrate and m is not product
+                 and m.name not in UNPIPETTED]
+
+    # Which side of the equation a cofactor is on decides what it starts at,
+    # and the reaction just fetched from Rhea is what knows. NAD+ is pipetted
+    # in excess; NADH is made during the run and starts at zero. Reading that
+    # off the recipe instead would be a fourth place to get it wrong.
+    consumed = {element.species_id for element in reaction.reactants}
 
     measurements = []
     for index, initial in enumerate(recipe["initials"]):
@@ -188,27 +252,37 @@ def build(recipe: dict, *, creator: tuple[str, str, str],
                                       recipe["enzyme"], TIME_POINTS, rng)
         measurement = pe.Measurement(
             id=f"m{index}",
-            name=f"{substrate.name} {initial:g} mM",
+            name=f"{substrate.name} {initial:g} {SHORT_UNIT.get(unit, unit)}",
             group_id=recipe["group_id"],
             ph=recipe["ph"],
             temperature=recipe["temperature"],
             temperature_unit="°C",
         )
-        for species, series in ((substrate, series_s), (product, series_p)):
+        # The kinetics are quoted in the recipe's unit, so everything whose
+        # numbers come out of the simulation carries it; the cofactor in
+        # excess is pipetted in mmol/l regardless.
+        followed = [(substrate, series_s), (product, series_p)]
+        for species in cofactors:
+            if species.id not in consumed:
+                # NADH: 1:1 with the product, and the same numbers rather than
+                # a second draw of noise — the description says the substrate
+                # curve was *derived* from this signal, so they are one
+                # measurement written down twice.
+                followed.append((species, series_p))
+        for species, series in followed:
             measurement.add_to_species_data(
                 species_id=species.id, initial=series[0], prepared=series[0],
                 data=series, time=list(TIME_POINTS),
-                data_unit=DATA_UNIT, time_unit=TIME_UNIT,
+                data_unit=unit, time_unit=TIME_UNIT,
                 data_type=pe.DataTypes.CONCENTRATION, is_simulated=False)
         # In the vessel, followed by nothing: still part of the experiment.
-        for species in cofactors + [protein]:
+        for species in [s for s in cofactors if s.id in consumed] + [protein]:
+            enzyme = species is protein
             measurement.add_to_species_data(
                 species_id=species.id,
-                initial=COFACTOR_INITIAL if species is not protein
-                else recipe["enzyme"],
-                prepared=COFACTOR_INITIAL if species is not protein
-                else recipe["enzyme"],
-                data_unit=DATA_UNIT, time_unit=TIME_UNIT,
+                initial=recipe["enzyme"] if enzyme else COFACTOR_INITIAL,
+                prepared=recipe["enzyme"] if enzyme else COFACTOR_INITIAL,
+                data_unit=unit if enzyme else DATA_UNIT, time_unit=TIME_UNIT,
                 data_type=pe.DataTypes.CONCENTRATION, is_simulated=False,
                 data=[], time=[])
         measurements.append(measurement)
@@ -220,6 +294,8 @@ def build(recipe: dict, *, creator: tuple[str, str, str],
             headline=f"{protein.name} from {protein.organism} converts "
                      f"{substrate.name} to {product.name}.",
             substrate=substrate.name, points=len(TIME_POINTS),
+            initials=", ".join(f"{i:g}" for i in recipe["initials"])
+                     + f" {SHORT_UNIT.get(unit, unit)}, K_m {recipe['k_m']:g}",
             span=TIME_POINTS[-1], rhea=recipe["rhea"],
             uniprot=recipe["uniprot"]),
         references=[f"https://www.rhea-db.org/rhea/{recipe['rhea'].split(':')[-1]}",
@@ -231,7 +307,51 @@ def build(recipe: dict, *, creator: tuple[str, str, str],
         measurements=measurements,
         creators=[pe.Creator(given_name=given, family_name=family, mail=mail)],
     )
-    return json.loads(document.model_dump_json(exclude_none=True))
+    return stable_ids(json.loads(document.model_dump_json(exclude_none=True)),
+                      recipe["key"])
+
+
+def stable_ids(document: dict, seed: str) -> dict:
+    """Re-issue pyenzyme's random ``ld_id`` UUIDs as a function of the seed.
+
+    Objects with no identifier of their own — a creator, a vessel, every
+    reaction element — get ``enzml:Vessel/<uuid4>``, freshly drawn on each run.
+    The numbers in these documents are reproducible by design, and these ids
+    were the one thing that was not: rebuilding the files changed a hundred
+    lines that mean nothing, which is how a real change goes unnoticed in the
+    diff.
+
+    Only the UUID is replaced, never the prefix, and the replacement is a
+    uuid5 of the document's own key plus a per-class counter in document
+    order. Uniqueness within the document is all a JSON-LD node identifier
+    has to offer, and this keeps it while making the file a reviewable
+    artifact of the script that wrote it.
+    """
+    namespace = uuid.uuid5(uuid.NAMESPACE_URL, "https://enzymeml.org/seed")
+    counters: dict[str, int] = {}
+
+    def walk(node: Any) -> Any:
+        if isinstance(node, list):
+            return [walk(item) for item in node]
+        if not isinstance(node, dict):
+            return node
+        out = {}
+        for key, value in node.items():
+            if key == "ld_id" and isinstance(value, str) and "/" in value:
+                prefix, _, tail = value.rpartition("/")
+                try:
+                    uuid.UUID(tail)
+                except ValueError:
+                    out[key] = value          # a real identifier, left alone
+                    continue
+                counters[prefix] = counters.get(prefix, 0) + 1
+                out[key] = f"{prefix}/" + str(
+                    uuid.uuid5(namespace, f"{seed}:{prefix}:{counters[prefix]}"))
+            else:
+                out[key] = walk(value)
+        return out
+
+    return walk(document)
 
 
 # --- putting it into an instance ---------------------------------------------
@@ -369,12 +489,16 @@ def main(argv: list[str]) -> int:
     if not args.commit:
         print("\n(dry run — nothing was sent. Add --commit to create them.)")
 
+    # The queries are printed because notebook 2 asks for them by name: its
+    # exercise is to find these entries and put two of them side by side, and
+    # a query nobody can guess is an exercise nobody can do.
+    first, last = documents[0][2], documents[-1][2]
     print("\nQueries that will find these once they are in:")
-    print('  extrafield:"EC number":1.1.1.1          the two ADH documents')
-    print('  extrafield:"Organism":"Homo sapiens"    the LDH document')
-    for _, _, when in documents[:1]:
-        last = documents[-1][2]
-        print(f"  date:{when}..{last}          all three")
+    print('  extrafield:"EC number":1.1.1.1              the two ADH documents')
+    print('  extrafield:"Organism":"Homo sapiens"        LDH and ALDH')
+    print('  extrafield:"Group ID":dilution_series_adh_yeast')
+    print("                                             one series, all three runs")
+    print(f"  date:{first}..{last}              all {len(documents)}")
     return 0
 
 

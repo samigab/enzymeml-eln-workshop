@@ -100,60 +100,73 @@ def _(f_connect, mo, ok, remote):
     mo.stop(
         not (f_connect.value["url"].strip() and f_connect.value["token"].strip()),
         mo.callout(
-            mo.md("**Waiting for an instance and a key.** Both fields above "
-                  "have to be filled in before anything is fetched."),
-            kind="neutral"),
+            mo.md(
+                "**Waiting for an instance and a key.** Both fields above "
+                "have to be filled in before anything is fetched."
+            ),
+            kind="neutral",
+        ),
     )
 
     session, connect_error = None, None
     try:
-        session = remote.connect(f_connect.value["url"],
-                                 f_connect.value["token"])
+        session = remote.connect(f_connect.value["url"], f_connect.value["token"])
     except remote.RemoteError as exc:
         connect_error = str(exc)
 
     mo.stop(
         connect_error is not None,
-        mo.callout(mo.md(f"### Could not connect\n\n> {connect_error}"),
-                   kind="danger"),
+        mo.callout(mo.md(f"### Could not connect\n\n> {connect_error}"), kind="danger"),
     )
-    ok(f"Connected as **{session.whoami}** — `{session.url}`. "
-       "Every call from here on is a read.")
+    ok(
+        f"Connected as **{session.whoami}** — `{session.url}`. "
+        "Every call from here on is a read."
+    )
     return (session,)
 
 
 @app.cell(hide_code=True)
 def _(mo, remote, task, why):
-    mo.vstack([
-        mo.md(
-            """
+    mo.vstack(
+        [
+            mo.md(
+                """
             ---
             ## Find the entries
 
             `q` searches title, body and elabid. `extended` is eLabFTW's
             advanced query language, and it is the more interesting of the two:
-            it reaches the **extra fields** — the ones step 1 wrote.
+            it reaches the **extra fields** which step 1 wrote.
             """
-        ),
-        why(
-            "The query language",
-            "Search terms this instance understands, from eLabFTW's own "
-            "grammar (`src/node/grammar/queryGrammar.pegjs`):\n\n"
-            + "\n".join(f"- `{q}` — {what}" for q, what in remote.QUERY_EXAMPLES)
-            + "\n\nThey combine with `and`, `or` and `not`. This is where the "
-            "work from step 1 pays off: `extrafield:\"Organism\":…` only finds "
-            "anything because the organism was written as a *field* rather "
-            "than buried in the prose of an entry body."
-        ),
-        task(
-            """
+            ),
+            why(
+                "The query language",
+                "Search terms this instance understands, from eLabFTW's own "
+                "grammar (`src/node/grammar/queryGrammar.pegjs`):\n\n"
+                + "\n".join(f"- `{q}` — {what}" for q, what in remote.QUERY_EXAMPLES)
+                + "\n\nThey combine with `and`, `or` and `not`. This is where the "
+                'work from step 1 pays off: `extrafield:"Organism":…` only finds '
+                "anything because the organism was written as a *field* rather "
+                "than buried in the prose of an entry body.",
+            ),
+            task(
+                """
             Leave both boxes empty first and just look at what the demo
             contains. Then try `extrafield:"Group ID":dilution_series_1` to
             find the series somebody exported in step 1 — including, if the
             timing works out, your own.
+
+            If the instance was seeded with `test/seed_demo.py`, these find
+            the four documents in `examples/seed/` instead, and they are the
+            ones worth comparing below:
+
+            - `extrafield:"EC number":1.1.1.1` — the two ADH experiments, same
+              reaction, different organism
+            - `extrafield:"Organism":"Homo sapiens"` — the LDH and the ALDH
             """
-        ),
-    ])
+            ),
+        ]
+    )
     return
 
 
@@ -466,28 +479,56 @@ def _(documents, mo, why):
 def _(compare, documents, mo, summarise, why):
     # With exactly two documents, our own round-trip differ answers "what
     # changed between these" as well as it answers "did the export survive".
+    # With any other number it is the wrong tool, so the panel says what
+    # several documents are *for* instead of asking for a third one back.
     _pair = documents[:2] if len(documents) == 2 else None
 
     if _pair:
         _deltas = list(compare(_pair[0]["document"], _pair[1]["document"]))
         _counts = ", ".join(f"{n} {k}" for k, n in summarise(_deltas).items() if n)
-        _top = sorted({d.path.split(".")[1].split("[")[0]
-                       for d in _deltas if d.path.count(".") >= 1})
-        _out = mo.vstack([
-            mo.md(f"### Entry {_pair[0]['id']} vs. entry {_pair[1]['id']}\n\n"
-                  f"**{len(_deltas)} difference(s)** — {_counts or 'none'}. "
-                  + (f"They sit under: {', '.join(f'`{t}`' for t in _top)}."
-                     if _top else "The two documents are identical.")),
-            why("Every difference",
-                "```\n" + "\n".join(str(d) for d in _deltas[:60])
-                + (f"\n… and {len(_deltas) - 60} more" if len(_deltas) > 60 else "")
-                + "\n```"),
-        ])
+        _top = sorted(
+            {
+                d.path.split(".")[1].split("[")[0]
+                for d in _deltas
+                if d.path.count(".") >= 1
+            }
+        )
+        _out = mo.vstack(
+            [
+                mo.md(
+                    f"### Entry {_pair[0]['id']} vs. entry {_pair[1]['id']}\n\n"
+                    f"**{len(_deltas)} difference(s)** — {_counts or 'none'}. "
+                    + (
+                        f"They sit under: {', '.join(f'`{t}`' for t in _top)}."
+                        if _top
+                        else "The two documents are identical."
+                    )
+                ),
+                why(
+                    "Every difference",
+                    "```\n"
+                    + "\n".join(str(d) for d in _deltas[:60])
+                    + (f"\n… and {len(_deltas) - 60} more" if len(_deltas) > 60 else "")
+                    + "\n```",
+                ),
+            ]
+        )
     else:
         _out = mo.md(
-            "*Select exactly two entries to get a structural diff between "
-            "them here — the same comparison that checks the round trip in "
-            "step 1, pointed at two experiments instead.*")
+            "**Fetch as many as the question needs.** Nothing here is limited "
+            "to one entry or two: every selected entry comes back as a "
+            "document, and several of them in hand is what the table above is "
+            "for — does the same species carry the same id in every "
+            "experiment, the same unit, the same vessel, were they run at a "
+            "comparable pH.\n\n"
+            "That is also where this stops being a viewer. The documents are "
+            "machine-readable input to whatever comes next: the pooled time "
+            "courses of several runs as the likelihood of a Bayesian fit, "
+            "`k_cat` and `K_M` estimated per enzyme and compared across "
+            "organisms, a performance evaluation that ranks candidates for a "
+            "process — none of which needs a single number to be retyped, "
+            "because none of it starts from a PDF."
+        )
     _out
     return
 
