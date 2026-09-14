@@ -41,9 +41,10 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo, task):
-    mo.vstack([
-        mo.md(
-            """
+    mo.vstack(
+        [
+            mo.md(
+                """
             # Step 2 — Get the documents back out
 
             Steps 0 and 1 went one way: a document became a lab notebook entry.
@@ -59,18 +60,20 @@ def _(mo, task):
 
             **Nothing below exists until you connect.**
             """
-        ),
-        task(
-            """
+            ),
+            task(
+                """
             On <https://demo.elabftw.net>, go to **User panel → API keys** and
             create one. **Read-only permission is enough** for this notebook —
             pick it, and nothing you do here can damage anything.
-
+            
+            
             The key goes in the password field below and is never written to
             disk by this notebook. The demo is reset every 24 h, key included.
             """
-        ),
-    ])
+            ),
+        ]
+    )
     return
 
 
@@ -81,10 +84,12 @@ def _(mo):
         **Instance** {url} &nbsp;&nbsp; **API key** {token}
         """
     ).batch(
-        url=mo.ui.text(value="https://demo.elabftw.net",
-                       placeholder="https://…", full_width=True),
-        token=mo.ui.text(kind="password", placeholder="from User panel → API keys",
-                         full_width=True),
+        url=mo.ui.text(
+            value="https://demo.elabftw.net", placeholder="https://…", full_width=True
+        ),
+        token=mo.ui.text(
+            kind="password", placeholder="from User panel → API keys", full_width=True
+        ),
     )
     f_connect
     return (f_connect,)
@@ -161,8 +166,7 @@ def _(mo):
         """
     ).batch(
         q=mo.ui.text(placeholder="a word in title or body"),
-        extended=mo.ui.text(placeholder='date:2026-09-01..2026-09-30',
-                            full_width=True),
+        extended=mo.ui.text(placeholder="date:2026-09-01..2026-09-30", full_width=True),
         limit=mo.ui.number(start=1, stop=200, step=1, value=25),
     )
     f_search
@@ -178,11 +182,18 @@ def _(mo, remote, session):
     except remote.RemoteError:
         _keys = []
 
-    mo.accordion({
-        f"💡 Extra-field names in use on this instance ({len(_keys)})":
-            mo.ui.table([{"Field": k["key"], "Entries": k["count"]}
-                         for k in _keys], selection=None)
-    }) if _keys else mo.md("")
+    (
+        mo.accordion(
+            {
+                f"💡 Extra-field names in use on this instance ({len(_keys)})": mo.ui.table(
+                    [{"Field": k["key"], "Entries": k["count"]} for k in _keys],
+                    selection=None,
+                )
+            }
+        )
+        if _keys
+        else mo.md("")
+    )
     return
 
 
@@ -190,30 +201,42 @@ def _(mo, remote, session):
 def _(f_search, mo, remote, session):
     results, search_error = [], None
     try:
-        results = remote.search(session,
-                                q=f_search.value["q"],
-                                extended=f_search.value["extended"],
-                                limit=int(f_search.value["limit"]))
+        results = remote.search(
+            session,
+            q=f_search.value["q"],
+            extended=f_search.value["extended"],
+            limit=int(f_search.value["limit"]),
+        )
     except remote.RemoteError as exc:
         search_error = str(exc)
 
     mo.stop(
         search_error is not None,
         mo.callout(
-            mo.md(f"### The search was refused\n\n> {search_error}\n\n"
-                  "An invalid `extended` query is the usual cause — eLabFTW "
-                  "rejects the whole query rather than ignoring the bad part."),
-            kind="danger"),
+            mo.md(
+                f"### The search was refused\n\n> {search_error}\n\n"
+                "An invalid `extended` query is the usual cause — eLabFTW "
+                "rejects the whole query rather than ignoring the bad part."
+            ),
+            kind="danger",
+        ),
     )
 
-    t_results = mo.ui.table(results, selection="multi", page_size=15,
-                            label="**Select the entries to fetch**")
-    mo.vstack([
-        mo.md(f"**{len(results)} entr{'y' if len(results) == 1 else 'ies'}**"
-              + (" — nothing matched; widen the query."
-                 if not results else "")),
-        t_results,
-    ])
+    t_results = mo.ui.table(
+        results,
+        selection="multi",
+        page_size=15,
+        label="**Select the entries to fetch**",
+    )
+    mo.vstack(
+        [
+            mo.md(
+                f"**{len(results)} entr{'y' if len(results) == 1 else 'ies'}**"
+                + (" — nothing matched; widen the query." if not results else "")
+            ),
+            t_results,
+        ]
+    )
     return (t_results,)
 
 
@@ -221,11 +244,14 @@ def _(f_search, mo, remote, session):
 def _(mo, t_results, task):
     f_fetch = mo.ui.run_button(
         label=f"⬇ Fetch {len(t_results.value)} selected document(s)",
-        disabled=not t_results.value, kind="success")
+        disabled=not t_results.value,
+        kind="success",
+    )
 
-    mo.vstack([
-        mo.md(
-            """
+    mo.vstack(
+        [
+            mo.md(
+                """
             ---
             ## Fetch the documents
 
@@ -233,62 +259,90 @@ def _(mo, t_results, task):
             it takes a deliberate click. One request per entry to list its
             attachments, one more to download the document itself.
             """
-        ),
-        task(
-            """
+            ),
+            task(
+                """
             Pick **two entries from different days** and fetch them both. That
             is scenario 3 — two runs side by side — and it is the reason the
             date went into a field instead of only into the title.
             """
-        ),
-        f_fetch,
-    ])
+            ),
+            f_fetch,
+        ]
+    )
     return (f_fetch,)
 
 
 @app.cell(hide_code=True)
 def _(f_fetch, mo, pick, remote, session, t_results):
-    mo.stop(not f_fetch.value,
-            mo.md("*Select rows above and press the button.*"))
+    mo.stop(not f_fetch.value, mo.md("*Select rows above and press the button.*"))
 
     documents, failures = [], []
     for _row in t_results.value:
         _eid = _row["id"]
         try:
             _doc, _upload = remote.fetch_document(session, _eid)
-            documents.append({"id": _eid, "title": _row["title"],
-                              "date": _row["date"], "document": _doc,
-                              "schema": pick(_doc).SCHEMA,
-                              "via": _upload["name"]})
+            documents.append(
+                {
+                    "id": _eid,
+                    "title": _row["title"],
+                    "date": _row["date"],
+                    "document": _doc,
+                    "schema": pick(_doc).SCHEMA,
+                    "via": _upload["name"],
+                }
+            )
         except remote.RemoteError as exc:
             failures.append((_eid, _row["title"], str(exc)))
 
     mo.stop(
         not documents,
         mo.callout(
-            mo.md("### Nothing could be turned back into a document\n\n"
-                  + "\n".join(f"- **{i} · {t}** — {e.splitlines()[0]}"
-                              for i, t, e in failures)),
-            kind="danger"),
+            mo.md(
+                "### Nothing could be turned back into a document\n\n"
+                + "\n".join(
+                    f"- **{i} · {t}** — {e.splitlines()[0]}" for i, t, e in failures
+                )
+            ),
+            kind="danger",
+        ),
     )
     return documents, failures
 
 
 @app.cell(hide_code=True)
 def _(documents, failures, mo, ok):
-    mo.vstack([x for x in (
-        ok(f"**{len(documents)} document(s)** read back: "
-           + ", ".join(f"`{d['schema']}` from entry {d['id']}"
-                       for d in documents)),
-        mo.callout(
-            mo.md("**Entries that carry no document:**\n\n"
-                  + "\n".join(f"- **{i} · {t}** — {e.splitlines()[0]}"
-                              for i, t, e in failures)
-                  + "\n\nAn entry written by hand in eLabFTW has extra fields "
-                  "but no attachment, and extra fields alone cannot be turned "
-                  "back into a document — they are a summary, not the record."),
-            kind="warn") if failures else None,
-    ) if x])
+    mo.vstack(
+        [
+            x
+            for x in (
+                ok(
+                    f"**{len(documents)} document(s)** read back: "
+                    + ", ".join(
+                        f"`{d['schema']}` from entry {d['id']}" for d in documents
+                    )
+                ),
+                (
+                    mo.callout(
+                        mo.md(
+                            "**Entries that carry no document:**\n\n"
+                            + "\n".join(
+                                f"- **{i} · {t}** — {e.splitlines()[0]}"
+                                for i, t, e in failures
+                            )
+                            + "\n\nAn entry written by hand in eLabFTW has extra fields "
+                            "but no attachment, and extra fields alone cannot be turned "
+                            "back into a document — they are a summary, not the record."
+                        ),
+                        kind="warn",
+                    )
+                    if failures
+                    else None
+                ),
+            )
+            if x
+        ]
+    )
     return
 
 
@@ -299,43 +353,58 @@ def _(documents, mo):
         if entry["schema"] == "enzymeml":
             measurements = doc.get("measurements") or []
             phs = sorted({m.get("ph") for m in measurements if m.get("ph")})
-            temps = sorted({m.get("temperature") for m in measurements
-                            if m.get("temperature")})
-            series = sorted({m.get("group_id") for m in measurements
-                             if m.get("group_id")})
+            temps = sorted(
+                {m.get("temperature") for m in measurements if m.get("temperature")}
+            )
+            series = sorted(
+                {m.get("group_id") for m in measurements if m.get("group_id")}
+            )
             return {
-                "Entry": entry["id"], "Date": entry["date"],
+                "Entry": entry["id"],
+                "Date": entry["date"],
                 "Name": doc.get("name") or "",
                 "Species": len(doc.get("small_molecules") or [])
-                           + len(doc.get("proteins") or []),
+                + len(doc.get("proteins") or []),
                 "Measurements": len(measurements),
-                "Points": sum(len(s.get("data") or [])
-                              for m in measurements
-                              for s in m.get("species_data") or []),
+                "Points": sum(
+                    len(s.get("data") or [])
+                    for m in measurements
+                    for s in m.get("species_data") or []
+                ),
                 "pH": ", ".join(str(p) for p in phs),
                 "T": ", ".join(str(t) for t in temps),
                 "Series": ", ".join(series),
                 "Creators": ", ".join(
                     f"{c.get('given_name','')} {c.get('family_name','')}".strip()
-                    for c in doc.get("creators") or []),
+                    for c in doc.get("creators") or []
+                ),
             }
         citation = doc.get("citation") or {}
         return {
-            "Entry": entry["id"], "Date": entry["date"],
+            "Entry": entry["id"],
+            "Date": entry["date"],
             "Name": citation.get("title") or "",
             "Species": len(doc.get("compound") or []),
             "Measurements": len(doc.get("fluid") or []),
-            "Points": "", "pH": "", "T": "", "Series": "",
+            "Points": "",
+            "pH": "",
+            "T": "",
+            "Series": "",
             "Creators": ", ".join(
                 f"{a.get('given_name','')} {a.get('family_name','')}".strip()
-                for a in citation.get("author") or []),
+                for a in citation.get("author") or []
+            ),
         }
 
-    mo.vstack([
-        mo.md("---\n## Side by side\n\nOne row per document — the comparison "
-              "that a folder of PDFs cannot give you."),
-        mo.ui.table([_facts(d) for d in documents], selection=None),
-    ])
+    mo.vstack(
+        [
+            mo.md(
+                "---\n## Side by side\n\nOne row per document — the comparison "
+                "that a folder of PDFs cannot give you."
+            ),
+            mo.ui.table([_facts(d) for d in documents], selection=None),
+        ]
+    )
     return
 
 
@@ -346,26 +415,38 @@ def _(documents, mo, why):
     _names = {}
     for _entry in documents:
         _doc = _entry["document"]
-        for _species in ((_doc.get("small_molecules") or [])
-                         + (_doc.get("proteins") or [])
-                         + (_doc.get("compound") or [])):
-            _key = (_species.get("id") or _species.get("compoundID")
-                    or _species.get("name") or "?")
+        for _species in (
+            (_doc.get("small_molecules") or [])
+            + (_doc.get("proteins") or [])
+            + (_doc.get("compound") or [])
+        ):
+            _key = (
+                _species.get("id")
+                or _species.get("compoundID")
+                or _species.get("name")
+                or "?"
+            )
             _names.setdefault(str(_key), {})[_entry["id"]] = (
-                _species.get("name") or _species.get("commonName") or "✓")
+                _species.get("name") or _species.get("commonName") or "✓"
+            )
 
     _ids = [d["id"] for d in documents]
-    _rows = [{"Species": k, **{f"Entry {i}": v.get(i, "—") for i in _ids}}
-             for k, v in sorted(_names.items())]
+    _rows = [
+        {"Species": k, **{f"Entry {i}": v.get(i, "—") for i in _ids}}
+        for k, v in sorted(_names.items())
+    ]
     _shared = sum(1 for _, v in _names.items() if len(v) == len(_ids))
 
-    mo.vstack([
-        mo.md(f"**{len(_names)} distinct species** across the selection, "
-              f"**{_shared}** present in all of them."),
-        mo.ui.table(_rows, selection=None, page_size=15),
-        why(
-            "Why this table is the point",
-            """
+    mo.vstack(
+        [
+            mo.md(
+                f"**{len(_names)} distinct species** across the selection, "
+                f"**{_shared}** present in all of them."
+            ),
+            mo.ui.table(_rows, selection=None, page_size=15),
+            why(
+                "Why this table is the point",
+                """
             The species ids line up because they came from the same
             registries — Rhea's `ethanol` is Rhea's `ethanol` in every
             document that fetched it. Had each experiment invented its own
@@ -375,8 +456,9 @@ def _(documents, mo, why):
             That is what identifiers buy, and it is invisible until the
             moment you put two experiments next to each other.
             """,
-        ),
-    ])
+            ),
+        ]
+    )
     return
 
 
@@ -414,8 +496,9 @@ def _(compare, documents, mo, summarise, why):
 def _(documents, io, json, mo, zipfile):
     _one = len(documents) == 1
     if _one:
-        _payload = (json.dumps(documents[0]["document"], indent=2,
-                               ensure_ascii=False) + "\n").encode()
+        _payload = (
+            json.dumps(documents[0]["document"], indent=2, ensure_ascii=False) + "\n"
+        ).encode()
         _name = f"entry-{documents[0]['id']}.json"
         _mime = "application/json"
     else:
@@ -424,15 +507,16 @@ def _(documents, io, json, mo, zipfile):
             for _entry in documents:
                 _zf.writestr(
                     f"entry-{_entry['id']}.json",
-                    json.dumps(_entry["document"], indent=2,
-                               ensure_ascii=False) + "\n")
+                    json.dumps(_entry["document"], indent=2, ensure_ascii=False) + "\n",
+                )
         _payload = _buffer.getvalue()
         _name = "documents.zip"
         _mime = "application/zip"
 
-    mo.vstack([
-        mo.md(
-            """
+    mo.vstack(
+        [
+            mo.md(
+                """
             ---
             ## Take them with you
 
@@ -440,16 +524,22 @@ def _(documents, io, json, mo, zipfile):
             same bytes step 1 attached, ready for the analysis of your choice
             or for step 3.
             """
-        ),
-        mo.download(data=_payload, filename=_name, mimetype=_mime,
-                    label=f"⬇ {_name} ({max(1, len(_payload) // 1024)} KB)"),
-    ])
+            ),
+            mo.download(
+                data=_payload,
+                filename=_name,
+                mimetype=_mime,
+                label=f"⬇ {_name} ({max(1, len(_payload) // 1024)} KB)",
+            ),
+        ]
+    )
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md("""
+    mo.md(
+        """
     ---
     ### Next
 
@@ -462,7 +552,8 @@ def _(mo):
     nothing until you press a button. Reading, as here, is safe; writing
     into a lab notebook somebody else may be reading is not, and the
     difference deserves two notebooks rather than one.
-    """)
+    """
+    )
     return
 
 
