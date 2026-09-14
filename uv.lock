@@ -628,47 +628,26 @@ name = "eln-converter"
 version = "0.3.0"
 source = { editable = "." }
 dependencies = [
-    { name = "rocrate" },
-]
-
-[package.optional-dependencies]
-plots = [
-    { name = "matplotlib" },
-]
-
-[package.dev-dependencies]
-api = [
-    { name = "elabapi-python" },
-]
-checks = [
-    { name = "jsonschema" },
-    { name = "roc-validator" },
-]
-dev = [
     { name = "anywidget" },
+    { name = "elabapi-python" },
+    { name = "jsonschema" },
     { name = "marimo" },
     { name = "matplotlib" },
     { name = "pyenzyme" },
+    { name = "roc-validator" },
+    { name = "rocrate" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "matplotlib", marker = "extra == 'plots'", specifier = ">=3.7" },
-    { name = "rocrate", specifier = ">=0.15" },
-]
-provides-extras = ["plots"]
-
-[package.metadata.requires-dev]
-api = [{ name = "elabapi-python", specifier = ">=5.6" }]
-checks = [
-    { name = "jsonschema", specifier = ">=4" },
-    { name = "roc-validator" },
-]
-dev = [
     { name = "anywidget", specifier = ">=0.9" },
+    { name = "elabapi-python", specifier = ">=5.6" },
+    { name = "jsonschema", specifier = ">=4" },
     { name = "marimo", specifier = ">=0.11" },
     { name = "matplotlib", specifier = ">=3.7" },
     { name = "pyenzyme", specifier = ">=2.2" },
+    { name = "roc-validator" },
+    { name = "rocrate", specifier = ">=0.15" },
 ]
 
 [[package]]

@@ -40,8 +40,6 @@
       "runtimeExecutable": "uv",
       "runtimeArgs": [
         "run",
-        "--group",
-        "api",
         "marimo",
         "run",
         "notebooks/02_retrieve.py",
@@ -59,8 +57,6 @@
       "runtimeExecutable": "uv",
       "runtimeArgs": [
         "run",
-        "--group",
-        "api",
         "marimo",
         "run",
         "notebooks/03_update.py",
@@ -74,13 +70,13 @@
       "port": 2721
     },
     {
-      "name": "step0-toy-graph",
+      "name": "toy-graph",
       "runtimeExecutable": "uv",
       "runtimeArgs": [
         "run",
         "marimo",
         "run",
-        "notebooks/00_model_graph_toy.py",
+        "test/00_model_graph_toy.py",
         "--headless",
         "--host",
         "127.0.0.1",
@@ -89,23 +85,6 @@
         "--no-token"
       ],
       "port": 2722
-    },
-    {
-      "name": "step0-graph",
-      "runtimeExecutable": "uv",
-      "runtimeArgs": [
-        "run",
-        "marimo",
-        "run",
-        "notebooks/00_build_document_graph.py",
-        "--headless",
-        "--host",
-        "127.0.0.1",
-        "--port",
-        "2723",
-        "--no-token"
-      ],
-      "port": 2723
     }
   ]
 }

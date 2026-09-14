@@ -81,17 +81,17 @@ def _field(obj: Any, *names, default=None):
 def _api():
     """Import the client lazily, with an explanation instead of an ImportError.
 
-    The converter core has no business requiring an HTTP client: exporting an
-    ``.eln`` never touches a network, and someone who only exports should not
-    have to install one.
+    Lazily because the converter core has no business needing an HTTP client at
+    import time: exporting an ``.eln`` never touches a network, and a broken
+    install of something unrelated should not take the export down with it.
     """
     try:
         import elabapi_python
     except ImportError:  # pragma: no cover - depends on the install
         raise RemoteError(
             "elabapi-python is not installed, so no instance can be reached.\n"
-            "  uv run --group api marimo edit notebooks/02_retrieve.py\n"
-            "installs it. Exporting an .eln does not need it."
+            "  uv sync\n"
+            "in the project folder installs it, with everything else."
         ) from None
     return elabapi_python
 

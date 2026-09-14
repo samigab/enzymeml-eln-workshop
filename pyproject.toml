@@ -1,49 +1,46 @@
 [project]
 name = "eln-converter"
 version = "0.3.0"
-description = "Export FAIRFluids and EnzymeML v2 as ELN RO-Crates (.eln) — and read them back"
+description = "Export FAIRFluids and EnzymeML v2 as ELN RO-Crates (.eln), and read them back"
 readme = "README.md"
 # The core would run on 3.9 (rocrate's own floor), but pyenzyme and current
-# matplotlib both require 3.11, and notebook 0 needs pyenzyme. Declaring 3.11
-# here makes uv say so before installing, and fetch a matching interpreter
-# itself, instead of producing an environment where notebook 0 fails on import.
+# matplotlib both require 3.11, and step 0 needs pyenzyme. Declaring 3.11 here
+# makes uv say so before installing, and fetch a matching interpreter itself,
+# instead of producing an environment where step 0 fails on import.
 requires-python = ">=3.11"
-# ro-crate-py is the reference implementation of the RO-Crate model. We build
-# the graph with it rather than assembling it by hand: the library enforces
-# flattened JSON-LD, and in doing so rejected two nodes of ours that eLabFTW
-# had been quietly skipping. The price is paid deliberately — since 0.3.0 the
-# core needs an install and no longer runs on a bare Python.
-dependencies = ["rocrate>=0.15"]
-
-[project.optional-dependencies]
-# Plots are a garnish: without matplotlib, plot.png is silently omitted.
-plots = ["matplotlib>=3.7"]
-
-[dependency-groups]
-# uv installs `dev` by default, so for the workshop this is enough:
-#   uv run marimo edit notebooks/00_build_document.py
-dev = [
-    # the graph view in notebook 0-graph is an anywidget: a few hundred lines
-    # of ES module that imports nothing, so the picture never depends on a CDN
-    "anywidget>=0.9",
+# One list, no extras and no dependency groups. There were four of those once,
+# and each one was defensible on its own: exporting an .eln never touches a
+# network, so why install an HTTP client, and so on. In a room full of
+# laptops it cost more than it saved. Every wrong-group install looks like a
+# broken repository from the participant's seat, the fix is a command they did
+# not run twenty minutes ago, and the whole saving was a few megabytes on a
+# machine that is already installing marimo. So: `uv sync` gets all of it, and
+# every command in the documentation is the same command.
+dependencies = [
+    # ro-crate-py is the reference implementation of the RO-Crate model. We
+    # build the graph with it rather than assembling it by hand: the library
+    # enforces flattened JSON-LD, and in doing so rejected two nodes of ours
+    # that eLabFTW had been quietly skipping.
+    "rocrate>=0.15",
+    # The notebooks.
     "marimo>=0.11",
-    "matplotlib>=3.7",
-    # the official EnzymeML v2 data model; notebook 0 builds the document with
-    # it instead of assembling a dict by hand
+    # The graph view in step 0 is an anywidget: a few hundred lines of ES
+    # module that imports nothing, so the picture never depends on a CDN.
+    "anywidget>=0.9",
+    # The official EnzymeML v2 data model. Step 0 builds the document with it
+    # instead of assembling a dict by hand, and fetches Rhea and UniProt
+    # through it.
     "pyenzyme>=2.2",
-]
-# Test tooling, not runtime: the same libraries the ELN Consortium's CI uses to
-# sign off on an .eln file. They check our export against foreign code rather
-# than against our own assumptions.
-checks = [
+    # Plots. Without it, plot.png is silently omitted from the package.
+    "matplotlib>=3.7",
+    # eLabFTW's own generated API client, for steps 2 and 3.
+    "elabapi-python>=5.6",
+    # Not runtime: the libraries the ELN Consortium's CI uses to sign off on
+    # an .eln. test/conformance.py grades our export with foreign code rather
+    # than with our own assumptions, which is worth having installed by
+    # default precisely because it is the check we did not write.
     "jsonschema>=4",
     "roc-validator",
-]
-# Only for the retrieval notebooks: eLabFTW's own generated API client.
-# Deliberately not in the core — exporting an .eln never touches a network, and
-# nobody who only exports should have to install an HTTP client.
-api = [
-    "elabapi-python>=5.6",
 ]
 
 [build-system]

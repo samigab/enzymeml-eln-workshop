@@ -7,7 +7,7 @@ maintainers accept. The checks in ``vendor/elnconsortium/checks.py`` are a
 verbatim copy of the suite behind the consortium's CI and their web checker, so
 a pass here means an independent implementation agrees.
 
-    uv run --group checks conformance.py out/kinetics.eln
+    uv run test/conformance.py out/kinetics.eln
 
 Exits non-zero if any check fails, so it can gate a release.
 """
@@ -100,7 +100,7 @@ def main(argv: list[str]) -> int:
         checks, shacl = _load_checks()
     except ImportError as exc:
         print(f"the vendored checks need their dependencies: {exc}")
-        print("install them with:  uv sync --group checks")
+        print("install them with:  uv sync")
         return 2
 
     failed = False

@@ -12,39 +12,80 @@ Two dedicated converters share the crate plumbing:
 
 ## Install
 
-Everything is driven by [uv](https://docs.astral.sh/uv/). One tool, one
-command, no virtualenv to activate by hand.
+Four steps, the same on Windows, macOS and Linux, and **neither Python nor
+git has to be on the machine already**. Everything is driven by
+[uv](https://docs.astral.sh/uv/): one tool, one command, no virtualenv to
+activate by hand.
 
-**1. Install uv** (once per machine):
+**1. Install uv**, once per machine. Copy the line for your system into a
+terminal (on Windows: press the Start key, type `powershell`, press Enter):
 
-```bash
-# Linux / macOS
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Windows (PowerShell)
+```powershell
+# Windows, in PowerShell
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-Restart the shell afterwards, then check it is there:
-
 ```bash
-uv --version        # 0.5.4 or newer — that is where `--all-groups` was added
-uv self update      # only if an older uv is already installed
+# macOS, in Terminal          (Applications > Utilities > Terminal)
+# Linux, in your terminal
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-**2. Get the repository and install everything:**
+**Then close that window and open a new one.** The installer puts `uv` on your
+PATH, and a terminal that was already running does not know about it yet. This
+single step is the one that eats workshop time.
 
 ```bash
-git clone <URL-of-this-repository> converter
-cd converter
-uv sync --all-groups --extra plots
+uv --version        # any 0.5.4 or newer is fine
 ```
 
-That is the whole installation. `uv sync` creates `.venv/`, installs the exact
-versions pinned in `uv.lock`, and fetches a suitable Python (3.11+) if the
-system one is too old — you do not have to install Python yourself.
+**2. Get the project.** Two ways, and **git is not required**. If you have it:
 
-**3. Check that it worked:**
+```bash
+git clone https://github.com/samigab/enzymeml-eln-workshop.git
+cd enzymeml-eln-workshop
+```
+
+If you do not, take the ZIP instead. On
+[the repository page](https://github.com/samigab/enzymeml-eln-workshop) the
+green **Code** button offers **Download ZIP**; unpack it the way you unpack
+anything, and go into the folder, which will be called
+`enzymeml-eln-workshop-master`. The same thing without leaving the terminal:
+
+```powershell
+# Windows, in PowerShell
+iwr https://github.com/samigab/enzymeml-eln-workshop/archive/refs/heads/master.zip -OutFile workshop.zip
+Expand-Archive workshop.zip -DestinationPath .
+cd enzymeml-eln-workshop-master
+```
+
+```bash
+# macOS / Linux
+curl -L https://github.com/samigab/enzymeml-eln-workshop/archive/refs/heads/master.zip -o workshop.zip
+unzip workshop.zip
+cd enzymeml-eln-workshop-master
+```
+
+No `unzip` either? uv brought a Python with it, so this works anywhere:
+`uv run --no-project python -m zipfile -e workshop.zip .`
+
+Nothing in the project uses git at runtime. The only thing the ZIP costs you is
+`git pull` for updates; to update, download it again.
+
+**3. Install everything:**
+
+```bash
+uv sync
+```
+
+That is the whole installation. It creates `.venv/`, installs the exact
+versions pinned in `uv.lock`, and fetches a suitable Python (3.11 or newer) if
+the system one is too old or missing. There is nothing optional to remember:
+one list of dependencies covers the converter, all four notebooks, the graph
+widget, the eLabFTW client and the conformance suite. Every command in this
+README works from here on.
+
+**4. Check that it worked:**
 
 ```bash
 uv run python -m eln examples/workshop/kinetics.solution.json -o out/kinetics.eln
@@ -56,63 +97,46 @@ wrote out/kinetics.eln  (1 entry, 0 resource item(s), 5 attachment(s))
 kinetics.eln: OK
 ```
 
-If both lines appear, you are ready.
-
-### What `--all-groups --extra plots` installs
-
-The dependencies are split into groups so nobody has to install what they will
-not use. `--all-groups --extra plots` takes all of them, which is the right
-choice for the workshop; the table is for anyone who wants less.
-
-| Group | Command | Contains | Needed for |
-|---|---|---|---|
-| *(core)* | `uv sync` | `rocrate` | the converter and the CLI |
-| `dev` | included by default | `marimo`, `matplotlib`, `pyenzyme`, `anywidget` | all six notebooks |
-| `api` | `uv sync --group api` | `elabapi-python` | notebooks 2 and 3 — talking to an eLabFTW instance |
-| `checks` | `uv sync --group checks` | `jsonschema`, `roc-validator` | `conformance.py`, the ELN Consortium's own test suite |
-| `plots` (extra) | `uv sync --extra plots` | `matplotlib` | attaching `plot.png`; without it the plot is silently omitted |
-
-`dev` is installed by default, so `uv sync` on its own already gets you the
-notebooks. The two that touch a network are opt-in on purpose: exporting an
-`.eln` never makes an HTTP request, and nobody who only exports should have to
-install an API client.
+If both lines appear, the laptop is ready. Do this the day before, not in the
+room: the first `uv sync` downloads a few hundred megabytes, and a whole room
+doing that at once is what conference wifi is worst at.
 
 ### Troubleshooting
 
 | Symptom | Cause and fix |
 |---|---|
-| `uv: command not found` after the install script | The shell has not picked up `~/.local/bin` yet. Open a new terminal. |
-| `error: The requested interpreter resolved to Python 3.10` | `uv python install 3.12`, then `uv sync --all-groups --extra plots` again. |
-| `ModuleNotFoundError: pyenzyme` in notebook 0 | Installed without the `dev` group. Re-run `uv sync --all-groups --extra plots`. |
-| `ModuleNotFoundError: modelgraph` or `anywidget` in a `_graph` notebook | Same cause, same fix. `modelgraph` ships with the project, so `uv sync` installs it. |
+| `uv: command not found`, or PowerShell says `uv` is not recognised | The terminal predates the installer. Close it, open a new one. |
+| `git: command not found` | You do not need git. Take the ZIP route in step 2. |
+| Windows: `running scripts is disabled on this system` | PowerShell's execution policy. Run `Set-ExecutionPolicy -Scope Process RemoteSigned` in that window, then the install line again. |
+| Windows: the unpacked folder contains one folder of the same name | Windows Explorer nests an extra level. Keep going down until you see `pyproject.toml`, and run `uv sync` there. |
+| macOS: `curl: command not found` | Install Apple's command line tools once: `xcode-select --install`. |
+| `error: The requested interpreter resolved to Python 3.10` | `uv python install 3.12`, then `uv sync` again. |
+| `ModuleNotFoundError` for anything at all | The command was run outside the project folder, or without `uv run`. Both are required: `cd` into the folder holding `pyproject.toml`, then `uv run ...`. |
 | The graph panel stays blank | Reload the tab once. The view mounts before its first data arrives, and a restored session can leave it waiting. |
-| `ModuleNotFoundError: elabapi_python` in notebook 2 or 3 | Started without `--group api`. Use the commands under [Run](#run) verbatim. |
 | Port already in use | Another notebook is still running. Close its tab and stop it with `Ctrl-C`, or pass `--port 2799`. |
-| Notebook opens but shows nothing | That is correct for notebooks 1–3. They stay empty until you upload a file or connect to an instance. |
+| A notebook opens but shows nothing | Correct for steps 1 to 3. They stay empty until you upload a file or connect to an instance. |
+| `error: No such file or directory (os error 2)` on `uv sync` | You are not in the project folder. `cd` into the one holding `pyproject.toml`. |
 
 ## Run
 
-Each notebook is one step and starts on its own:
+Each notebook is one step of the loop and starts on its own:
 
 ```bash
-uv run marimo edit notebooks/00_build_document.py            # build a document
-uv run marimo edit notebooks/01_export_eln.py                # document → .eln
-uv run --group api marimo edit notebooks/02_retrieve.py      # eLabFTW → document
-uv run --group api marimo edit notebooks/03_update.py        # write back (with a button)
-```
-
-The [live-graph alternative to step 0](#step-0-the-other-way-round--the-live-graph)
-is best presented as an app rather than as code — `marimo run` hides the cells
-and gives the graph the whole width:
-
-```bash
-uv run marimo run notebooks/00_model_graph_toy.py            # the toy model, for the demo
-uv run marimo run notebooks/00_build_document_graph.py       # the same thing, on EnzymeML
+uv run marimo edit notebooks/00_build_document.py     # build a document
+uv run marimo edit notebooks/01_export_eln.py         # document to .eln
+uv run marimo edit notebooks/02_retrieve.py           # eLabFTW to document
+uv run marimo edit notebooks/03_update.py             # write a correction back
 ```
 
 marimo prints a `http://localhost:2718` URL and opens the browser itself.
-`Ctrl-C` in the terminal stops it. Use `marimo run` instead of `marimo edit` to
-present a notebook as an app without the code cells.
+`Ctrl-C` in the terminal stops it. Swap `edit` for `run` to present a notebook
+as an app without its code cells, which is the better way to show step 0 to a
+room: the graph gets the whole width.
+
+```bash
+uv run marimo run test/00_model_graph_toy.py          # the toy model, for the demo
+uv run marimo run notebooks/00_build_document.py      # the same machinery, on EnzymeML
+```
 
 The command line does the same conversion without a browser. The direction
 follows from the input suffix: `.json` in means export, `.eln` in means read
@@ -195,53 +219,29 @@ today.
 
 ## Workshop material
 
-The notebooks are split by step, because the steps teach different things — and
-because each stays useful on its own:
+Four steps, one notebook each, in the order the loop runs. They are separate
+notebooks because the steps teach different things, and because each stays
+useful on its own:
 
-| Notebook | What it does | What it does *not* know |
-|---|---|---|
-| `00_build_document.py` | reads three CSVs and builds an EnzymeML document around them, one step per question the files cannot answer | that lab notebooks exist |
-| `00_build_document_graph.py` | *an alternative to step 0* — builds the same document one entity at a time, next to a live graph of it | that the data might have come from a file |
-| `00_model_graph_toy.py` | the same machinery on a five-class toy model, for showing how it works before any chemistry | what an enzyme is |
-| `01_export_eln.py` | upload a document → provenance form → `.eln` with extra fields, preview, round-trip | where the document came from |
-| `02_retrieve.py` | connect to an instance, search it, turn entries back into documents, compare side by side | how the entries got there |
-| `03_update.py` | write a corrected document back onto the **same** entry — show the plan, check for drift, send on a button press | what was changed in the document |
+| Step | Notebook | What it does | What it does *not* know |
+|---|---|---|---|
+| 0 | `00_build_document.py` | build an EnzymeML document one entity at a time, next to a live graph of it | that lab notebooks exist |
+| 1 | `01_export_eln.py` | upload a document, edit its provenance, get an `.eln` with extra fields, preview and round-trip | where the document came from |
+| 2 | `02_retrieve.py` | connect to an instance, search it, turn entries back into documents, compare them side by side | how the entries got there |
+| 3 | `03_update.py` | write a corrected document back onto the **same** entry: show the plan, check for drift, send on a button press | what was changed in the document |
 
 That indifference is the point: the adapter hangs off a *format*, not a tool.
 Whoever already has an EnzymeML or FAIRFluids document starts at step 1;
 whoever has none builds one in step 0.
 
-Step 0 starts where a measurement really ends: **three CSV files**, 99 numbers
-and three column headings. It then names the seven things those files cannot
-say, and spends one step on each —
+`test/00_model_graph_toy.py` is the same machinery as step 0 on a five-class
+toy model, a company with departments and employees. It knows nothing about
+enzymes, which is exactly what makes it the right thing to show first.
 
-1. **the files** — read them, count what is in them
-2. **the gap** — the seven questions, as a live checklist
-3. **what the columns are** — species from Rhea and UniProt, then each column
-   bound to one of them, with its unit
-4. **where, and under what conditions** — vessel, pH, temperature, which runs
-   belong together
-5. **what was in the vessel but never measured** — initial concentrations
-6. **what reaction this is** — including the one row no database gave you:
-   *this* protein catalyses *this* reaction
-7. **who measured it, and by what method**
-8. **the document** — assemble, review, download
+### Step 0, the document as a graph
 
-The checklist at the top counts the answers down as you supply them, so the
-notebook always shows both what has been built and what is still missing. Every
-table grows, so the same notebook carries a foreign experiment as well — drop
-your own CSVs on the box in step 1 and work down the same seven questions. The
-workshop instructions with the concrete values of the example dataset sit in
-blue boxes and can be skipped. **No kinetic model**: rate laws and fits have a
-session of their own, and the question *what did you measure* stays cleaner when
-it is not mixed with *what does it mean*.
-
-### Step 0, the other way round — the live graph
-
-`00_build_document_graph.py` answers a different question with the same
-library. Step 0 asks *what do the numbers not say*; this one asks **what is a
-data model actually made of** — and answers it by drawing the document while
-you build it.
+Step 0 starts from nothing and asks **what a scientific data model is actually
+made of**, then answers it by drawing the document while you build it.
 
 ```
 your input  ──►  pyenzyme object  ──┬──►  JSON preview + download
@@ -250,44 +250,57 @@ your input  ──►  pyenzyme object  ──┬──►  JSON preview + downl
 
 Everything to the right of the object is **derived**. The graph is read off the
 pydantic model with `model_fields` every time it changes, so there is no second
-copy of the data to keep in step — which is also why a bug in the drawing can
+copy of the data to keep in step, which is also why a bug in the drawing can
 never corrupt a document.
 
-Three kinds of edge come out of that walk, and the difference between them is
-most of what the notebook is for:
+Nine steps, in the order the model wants them, because a species has to exist
+before a reaction can name it and a measurement has to exist before its numbers
+can hang off it:
+
+1. **the document**, one object to hang everything else on
+2. **the vessel**, where the experiment happened
+3. **proteins**, the enzyme, with an EC number and a taxonomy ID
+4. **small molecules**, substrate, product, cofactors, buffer
+5. **the reaction**, on its own an empty box
+6. **participants**, the link no database can give you: *this* protein
+   catalyses *this* reaction
+7. **measurements**, one run and the conditions it ran under
+8. **the numbers**, bound to a species, in a unit, against a time axis
+9. **who measured it**
+
+Three kinds of edge come out of the walk over the model, and the difference
+between them is most of what the notebook is for:
 
 | line | means | example |
 |---|---|---|
-| solid | **contains** — a field holds an object | `EnzymeMLDocument` → `Protein` |
-| dashed, amber | **references** — a field holds another object's `id` | `SmallMolecule.vessel_id` → `Vessel` |
-| dotted, faint | **is a** — an instance and its type | *Lipase* → `Protein` |
+| solid | **contains**, a field holds an object | `EnzymeMLDocument` → `Protein` |
+| dashed, amber | **references**, a field holds another object's `id` | `SmallMolecule.vessel_id` → `Vessel` |
+| dotted, faint | **is a**, an instance and its type | *Lipase* → `Protein` |
 
 The amber ones are the payload. Nothing in the JSON's nesting shows them: they
 exist only because two strings match, and they are what makes the document a
 graph rather than a tree. Types are separate nodes from instances, so four
-small molecules are four nodes pointing at one `SmallMolecule` — and for
+small molecules are four nodes pointing at one `SmallMolecule`, and for
 pyenzyme that type node carries the real JSON-LD class, `enzml:Protein`,
 `OBO:PR_000000001`.
 
 Every edit is appended to a **step log**, and the document is folded out of the
 whole log rather than mutated. Undo is `log[:-1]`; the history slider is
 `log[:n]`; both come free. Click a node to see its properties, edit them in
-place, and watch the change travel object → JSON → graph.
+place, and watch the change travel object to JSON to graph.
 
-Step **8, *the numbers*,** is the only step that adds data, and it is the only
-one that opens an input box for it: drop a CSV on it — first column the time
-axis, one column per species after it — or paste two columns in by hand. The
-file is read when you press *Add SpeciesData*, not before, so filling in the
-form and choosing a column never disturb each other, and it is emptied
-afterwards so the next entry cannot silently inherit the previous one's series.
-Rows that do not parse are skipped **and counted**, because a file quietly
-losing three points on the way into a document is the failure the whole
-workshop is about.
+Step **8, the numbers**, is the only step that adds data, and the only one that
+opens an input box for it: drop a CSV on it, first column the time axis and one
+column per species after it, or paste two columns in by hand. The file is read
+when you press *Add SpeciesData*, not before, so filling in the form and
+choosing a column never disturb each other, and it is emptied afterwards so the
+next entry cannot silently inherit the previous one's series. Rows that do not
+parse are skipped **and counted**, because a file quietly losing three points on
+the way into a document is the failure this whole workshop is about.
 
-Run the toy version first if you are demonstrating this to a room —
-`00_model_graph_toy.py` is a company, its departments and its employees, five
-classes with no chemistry in the way. The engine underneath is the same file;
-only the field declarations differ.
+There is **no kinetic model** in step 0. Rate laws and fits have a session of
+their own, and the question *what did you measure* stays cleaner when it is not
+mixed with *what does it mean*.
 
 Step 1 starts **empty** — without an upload there is nothing to see, because
 every number in it comes from the uploaded document rather than from a built-in
@@ -330,17 +343,15 @@ second, explicit call. A human fits in between.
 ```bash
 uv run marimo edit notebooks/00_build_document.py
 uv run marimo edit notebooks/01_export_eln.py
-uv run --group api marimo edit notebooks/02_retrieve.py   # needs elabapi-python
-uv run --group api marimo edit notebooks/03_update.py     # writes — with a button
-uv run test/workshop_todo.py examples/workshop/kinetics.skeleton.json   # editor variant
+uv run marimo edit notebooks/02_retrieve.py
+uv run marimo edit notebooks/03_update.py
 ```
 
-`examples/workshop/` holds the hands-on dataset: the three raw CSVs plus an ADH
-kinetics document with filled data blocks and empty metadata blocks
-(`kinetics.skeleton.json`), and a reference solution. `workshop_todo.py` is the
-text variant and shows which fields are still open — JSON has no comments, so
-the assignment lives there. Sequence and didactics:
-[examples/workshop/README.md](examples/workshop/README.md).
+`notebooks/data/` holds the three raw CSVs to drop into step 0, next to the
+notebooks themselves because that is where anyone looks first.
+`examples/workshop/` keeps the finished document to compare against or to start
+from, and `examples/seed/` four contrasting documents for step 2 to compare.
+Sequence and didactics: [notebooks/README.md](notebooks/README.md).
 
 ## Round-trip
 
@@ -518,7 +529,6 @@ pinned to a commit (MIT). It is the same code that runs behind their CI and
 their web checker:
 
 ```bash
-uv sync --group checks
 uv run test/conformance.py out/kinetics.eln
 ```
 
@@ -601,8 +611,13 @@ test/conformance.py    the same file, graded by the ELN Consortium's suite
 test/roundtrip_eln.py  export → import → diff, per route
 test/workshop_todo.py  which metadata fields of a document are still open
 test/seed_demo.py      builds examples/seed/ and pushes it to an instance
-examples/seed/         four contrasting documents, so notebook 2 has something
-                       to compare — see its README
+test/00_model_graph_toy.py  step 0's machinery on a five-class toy model
+
+notebooks/README.md    the workshop handbook: four steps, install, demo instance
+notebooks/data/        the three CSVs step 0 reads
+examples/workshop/     the finished document and a metadata-free skeleton of it
+examples/seed/         four contrasting documents, so step 2 has something to
+                       compare. See its README
 sourcefiles/           the upstream schemas and the documents bundled with them
 vendor/                foreign code, verbatim and pinned — do not edit
 ```

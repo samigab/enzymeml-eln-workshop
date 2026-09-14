@@ -65,7 +65,7 @@ def _(mo):
 
         Before EnzymeML, a model small enough to hold in your head: a company,
         its departments, the people in them, and what they cost. Every
-        mechanism the [EnzymeML version](00_build_document_graph.py) uses is
+        mechanism the [EnzymeML version](../notebooks/00_build_document.py) uses is
         already here, and here you can see all of it at once.
 
         Three things are worth watching as you add records:
@@ -378,7 +378,7 @@ def _(mo):
         ### Next
 
         Everything above works on any pydantic model. Take it to a real one:
-        **[00_build_document_graph.py](00_build_document_graph.py)** builds an
+        **[notebooks/00_build_document.py](../notebooks/00_build_document.py)** builds an
         EnzymeML v2 document the same way, with the same graph, the same
         history slider and the same JSON panel — the only things that change
         are the field declarations and the twenty lines that nest them.

@@ -22,8 +22,8 @@ conflict to resolve.
 Run them with:
 
 ```bash
-uv sync --group checks
-uv run conformance.py some.eln
+uv sync
+uv run test/conformance.py some.eln
 ```
 
 The fifth check, `checkValidator`, needs `roc-validator` and downloads SHACL
