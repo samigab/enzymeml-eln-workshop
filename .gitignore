@@ -2,6 +2,11 @@ __pycache__/
 *.pyc
 .venv/
 
+# Editor and agent scratch space. `launch.json` in there only tells a local
+# tool how to start the notebooks; the documented way to start them is
+# `uv run marimo edit notebooks/...`, which needs nothing from this folder.
+.claude/
+
 # marimo drops session and layout caches next to the notebook
 __marimo__/
 
